@@ -11,13 +11,16 @@ export default class DeletarCliente extends Deletar {
         this.entrada = new Entrada()
     }
     public deletar(): void {
-        let cpf = this.entrada.receberTexto(`Por favor informe o número do cpf do cliente que deseja deletar: `)
-        let index = this.clientes.findIndex(cliente => cliente.getCpf.getValor === cpf)
-        if (index !== -1) {
-            this.clientes.splice(index, 1)
+        console.log('\n')
+        this.clientes.forEach((cliente, index) => {
+            console.log(`${index + 1} - ${cliente.nome}`)
+        })
+        let cliente = this.entrada.receberNumero(`\nPor favor informe o número do cliente que deseja deletar: `)
+        if (cliente > 0 && cliente <= this.clientes.length) {
+            this.clientes.splice(cliente - 1, 1)
             console.log('\nCliente deletado com sucesso\n')
         } else {
-            console.log('\nCliente não encontrado\n')
+            console.log('\nNúmero de cliente inválido\n')
         }
     }
 }

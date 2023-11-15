@@ -11,14 +11,23 @@ export default class CadastroServico extends Cadastro {
         this.entrada = new Entrada()
     }
     public cadastrar(): void {
-        console.log(`\nInício do cadastro de um serviço`);
-        let nome = this.entrada.receberTexto(`Por favor informe o nome do servico: `)
-        let valor = this.entrada.receberNumero(`Por favor informe o valor do serviço, no padrão 0.00: R$ `)
-        let servico = new Servico()
-        servico.nome = nome
-        servico.valor = valor
+        try {
+            console.log(`\nInício do cadastro de um serviço`);
+            let nome = this.entrada.receberTexto(`Por favor informe o nome do servico: `)
+            if (this.servicos.some(servico => servico.nome === nome)) {
+                throw new Error('Serviço já cadastrado.')
+            }
+            let valor = this.entrada.receberNumero(`Por favor informe o valor do serviço, no padrão 0.00: R$ `)
+            let servico = new Servico(nome, valor)
 
-        this.servicos.push(servico)
-        console.log(`\nCadastro concluído :)\n`);
+            this.servicos.push(servico)
+            console.log(`\nCadastro concluído :)\n`);
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(`\nErro durante o cadastro do serviço: ` + error.message + '\n')
+            } else {
+                console.error(`\nErro durante o cadastro do serviço.\n`)
+            }
+        }
     }
 }

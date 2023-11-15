@@ -11,13 +11,16 @@ export default class DeletarProduto extends Deletar {
         this.entrada = new Entrada()
     }
     public deletar(): void {
-        let nome = this.entrada.receberTexto(`Por favor informe o nome do produto que deseja deletar: `)
-        let index = this.produtos.findIndex(produto => produto.nome === nome)
-        if (index !== -1) {
-            this.produtos.splice(index, 1)
+        console.log('\n')
+        this.produtos.forEach((produto, index) => {
+            console.log(`${index + 1} - ${produto.nome} / Valor - R$${produto.valor}`)
+        })
+        let produto = this.entrada.receberNumero(`\nPor favor informe o número do produto que deseja deletar: `)
+        if (produto > 0 && produto <= this.produtos.length) {
+            this.produtos.splice(produto - 1, 1)
             console.log('\nProduto deletado com sucesso\n')
         } else {
-            console.log('\nProduto não encontrado\n')
+            console.log('\nNúmero de produto inválido\n')
         }
     }
 }

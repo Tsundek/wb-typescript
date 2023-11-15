@@ -15,5 +15,6 @@ export default class ListagemProdutos extends Listagem {
             console.log(`--------------------------------------`);
         });
         console.log(`\n`);
+        console.log(this.produtos)
     }
 }

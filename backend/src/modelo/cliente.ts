@@ -43,4 +43,27 @@ export default class Cliente {
     public get getProdutosConsumidos(): Array<Produto> {
         return this.produtosConsumidos
     }
+    public set setCpf(cpf: CPF) {
+        this.cpf = cpf
+    }
+    public adicionarTelefone(telefone: Telefone): void {
+        this.telefones.push(telefone)
+    }
+    public adicionarRg(rg: RG): void {
+        this.rgs.push(rg)
+    }
+    public atualizarRg(index: number, rg: RG): void {
+        if (index >= 0 && index < this.rgs.length) {
+            this.rgs[index] = rg
+        } else {
+            console.log('Índice inválido')
+        }
+    }
+    public atualizarTelefone(index: number, telefone: Telefone): void {
+        if (index >= 0 && index < this.telefones.length) {
+            this.telefones[index] = telefone
+        } else {
+            console.log('Índice inválido')
+        }
+    }
 }

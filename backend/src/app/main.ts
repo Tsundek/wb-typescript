@@ -16,6 +16,7 @@ import DeletarCliente from "../negocio/deletarCliente";
 import DeletarProduto from "../negocio/deletarProduto";
 import DeletarServico from "../negocio/deletarServico";
 
+import ListagemCliente from "../negocio/listagemCliente";
 import ListagemClienteGenero from "../negocio/listagemClienteGenero";
 import ListagemClientes from "../negocio/listagemClientes";
 import ListagemProdutoGenero from "../negocio/listagemProdutoGenero";
@@ -39,7 +40,8 @@ while (execucao) {
     console.log(`1 - Opções de cliente`);
     console.log(`2 - Opções de serviços`);
     console.log(`3 - Opções de produtos`);
-    console.log(`4 - Opções de listagem`);
+    console.log(`4 - Opções de consumo`);
+    console.log(`5 - Opções de listagem`);
     console.log(`0 - Sair`);
 
     let entrada = new Entrada()
@@ -49,11 +51,10 @@ while (execucao) {
         case 1:
             console.log(`\nOpções:`);
             console.log(`1 - Cadastrar cliente`);
-            console.log(`2 - Listar todos os clientes`);
-            console.log(`3 - Atualizar cliente`);
-            console.log(`4 - Deletar cliente`);
-            console.log(`5 - Consumir produto`);
-            console.log(`6 - Consumir serviço`);
+            console.log(`2 - Listar cliente`)
+            console.log(`3 - Listar todos os clientes`);
+            console.log(`4 - Atualizar cliente`);
+            console.log(`5 - Deletar cliente`);
             console.log(`0 - Voltar`);
             entrada = new Entrada()
             opcao = entrada.receberNumero(`Por favor, escolha uma opção: `)
@@ -63,24 +64,27 @@ while (execucao) {
                     cadastro.cadastrar()
                     break;
                 case 2:
+                    entrada = new Entrada()
+                    let cpf = entrada.receberTexto(`Por favor informe o CPF do cliente que deseja ver: `)
+                    let cliente = empresa.getClientes.find(cliente => cliente.getCpf.getValor === cpf)
+                    if (cliente) {
+                        let listagemCliente = new ListagemCliente(cliente)
+                        listagemCliente.listar()
+                    } else {
+                        console.log("\nCliente não encontrado\n")
+                    }
+                    break;
+                case 3:
                     let listagem = new ListagemClientes(empresa.getClientes)
                     listagem.listar()
                     break;
-                case 3:
+                case 4:
                     let atualizar = new AtualizacaoCliente(empresa.getClientes)
                     atualizar.atualizar()
                     break;
-                case 4:
+                case 5:
                     let deletar = new DeletarCliente(empresa.getClientes)
                     deletar.deletar()
-                    break;
-                case 5:
-                    let consumirProduto = new ConsumirProdutos(empresa.getClientes, empresa.getProdutos)
-                    consumirProduto.consumir()
-                    break;
-                case 6:
-                    let consumirServico = new ConsumirServicos(empresa.getClientes, empresa.getServicos)
-                    consumirServico.consumir()
                     break;
                 case 0:
                     console.log('\n')
@@ -157,8 +161,30 @@ while (execucao) {
                     console.log(`Operação não entendida :(`)
             }
             break
-
         case 4:
+            console.log(`\nOpções:`);
+            console.log(`1 - Consumir produto`);
+            console.log(`2 - Consumir serviço`);
+            console.log(`0 - Voltar`);
+            entrada = new Entrada()
+            opcao = entrada.receberNumero(`Por favor, escolha uma opção: `)
+            switch (opcao) {
+                case 1:
+                    let consumirProduto = new ConsumirProdutos(empresa.getClientes, empresa.getProdutos)
+                    consumirProduto.consumir()
+                    break;
+                case 2:
+                    let consumirServico = new ConsumirServicos(empresa.getClientes, empresa.getServicos)
+                    consumirServico.consumir()
+                    break;
+                case 0:
+                    console.log('\n')
+                    break
+                default:
+                    console.log(`Operação não entendida :(`)
+            }
+            break
+        case 5:
             console.log(`\nOpções:`);
             console.log(`1 - Listar os 10 clientes que mais consumiram produtos`);
             console.log(`2 - Listar os 10 clientes que mais consumiram serviços`);

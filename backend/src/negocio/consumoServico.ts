@@ -2,6 +2,7 @@ import Entrada from "../io/entrada"
 import Cliente from "../modelo/cliente"
 import Servico from "../modelo/servico"
 import Consumo from "./consumo"
+import ListagemCliente from "./listagemCliente"
 
 export default class ConsumirServicos extends Consumo {
     private clientes: Array<Cliente>
@@ -14,31 +15,44 @@ export default class ConsumirServicos extends Consumo {
         this.entrada = new Entrada()
     }
     public consumir(): void {
-        let cpf = this.entrada.receberTexto(`Por favor informe o CPF do cliente: `)
-        let cliente = this.clientes.find(cliente => cliente.getCpf.getValor === cpf)
-        if (cliente) {
-            console.log(`\nCliente: `)
-            console.log(`Nome: ` + cliente.nome)
-            console.log(`Nome social: ` + cliente.nomeSocial)
+        try {
             console.log('\n')
+            this.clientes.forEach((cliente, index) => {
+                console.log(`${index + 1} - ${cliente.nome}`)
+            })
+            let index = this.entrada.receberNumero(`\nPor favor informe o número do cliente que deseja atualizar os dados: `) - 1
+            if (index >= 0 && index < this.clientes.length) {
+                let cliente = this.clientes[index]
+                new ListagemCliente(cliente).listar()
 
-            let nomeServico = this.entrada.receberTexto(`Por favor informe o nome do serviço consumido: `)
-            let servico = this.servicos.find(servico => servico.nome === nomeServico)
-            if (servico) {
-                let servicoConsumido = cliente.getServicosConsumidos.find(servicoConsumido => servicoConsumido.nome === servico?.nome)
-                if (servicoConsumido) {
-                    servicoConsumido.quantidade += 1
-                } else {
-                    let novoServico = {...servico}
-                    novoServico.quantidade = 1
-                    cliente.getServicosConsumidos.push(novoServico)
+                this.servicos.forEach((servico, index) => {
+                    console.log(`${index + 1} - ${servico.nome} / Valor - R$${servico.valor}`)
+                })
+                let index2 = this.entrada.receberNumero(`\nPor favor informe o número do serviço que deseja atualizar: `) - 1
+                if (index2 >= 0 && index2 < this.servicos.length) {
+                    let servico = this.servicos[index]
+                    let servicoConsumido = cliente.getServicosConsumidos.find(servicoConsumido => servicoConsumido.nome === servico?.nome)
+                    if (servicoConsumido) {
+                        servicoConsumido.quantidade += 1
+                    } else {
+                        let novoServico = { ...servico }
+                        novoServico.quantidade = 1
+                        cliente.getServicosConsumidos.push(novoServico)
+                    }
+                    console.log(`\nServiço consumido registrado com sucesso\n`)
                 }
-                console.log(`\nServiço consumido registrado com sucesso\n`)
+                else {
+                    throw new Error(`Índice inválido`)
+                }
             } else {
-                console.log(`\nServiço não encontrado\n`)
+                throw new Error('Índice inválido')
             }
-        } else {
-            console.log(`\nCliente não encontrado\n`)
+        } catch (error) {
+            if (error instanceof Error) {
+                console.error(`\nErro durante o consumo do serviço: ` + error.message + '\n')
+            } else {
+                console.error(`\nErro durante o consumo do serviço.\n`)
+            }
         }
     }
 }

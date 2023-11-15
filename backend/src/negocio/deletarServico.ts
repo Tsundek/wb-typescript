@@ -11,13 +11,16 @@ export default class DeletarServico extends Deletar {
         this.entrada = new Entrada()
     }
     public deletar(): void {
-        let nome = this.entrada.receberTexto(`Por favor informe o nome do serviço que deseja deletar: `)
-        let index = this.servicos.findIndex(servico => servico.nome === nome)
-        if (index !== -1) {
-            this.servicos.splice(index, 1)
+        console.log('\n')
+        this.servicos.forEach((servico, index) => {
+            console.log(`${index + 1} - ${servico.nome} / Valor - R$${servico.valor}`)
+        })
+        let servico = this.entrada.receberNumero(`\nPor favor informe o número do serviço que deseja deletar: `)
+        if (servico > 0 && servico <= this.servicos.length) {
+            this.servicos.splice(servico - 1, 1)
             console.log('\nServiço deletado com sucesso\n')
         } else {
-            console.log('\nServiço não encontrado\n')
+            console.log('\nNúmero de serviço inválido\n')
         }
     }
 }
