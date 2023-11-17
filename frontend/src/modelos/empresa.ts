@@ -17,6 +17,20 @@ export default class Empresa {
     public addClientes(cliente: Cliente) {
         this._clientes.push(cliente)
     }
+    public deletarClientes(index: number){
+        if (index >= 0 && index < this._clientes.length) {
+            this._clientes.splice(index, 1)
+        } else {
+            alert ("Indice inválido")
+        }
+    }
+    public atualizarClientes(index: number, cliente: Cliente){
+        if (index >= 0 && index < this._clientes.length) {
+            this._clientes[index] = cliente
+        } else {
+            alert ("Indice inválido")
+        }
+    }
     public get getProdutos() {
         return this._produtos
     }
