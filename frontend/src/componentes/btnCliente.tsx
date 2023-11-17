@@ -7,18 +7,20 @@ type props = {
 
 export default class BotaoCliente extends Component<props> {
     componentDidMount() {
-        M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'))
+        M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'), {
+            hoverEnabled: false
+        })
     }
     render() {
         return (
             <div className="fixed-action-btn">
-                <button className="btn-floating btn-large pulse purple lighten-1">
-                    WB
+                <button className="btn-floating click-to-toggle btn-large pulse purple lighten-1">
+                   <i className="material-icons">people</i>
                 </button>
                 <ul>
-                    <li><button className="btn-floating green" onClick={(evento) => this.props.selecionarView('Cadastro', evento)}><i className="material-icons">add</i></button></li>
-                    <li><button className="btn-floating red"><i className="material-icons">delete</i></button></li>
-                    <li><button className="btn-floating yellow darken-1"><i className="material-icons">edit</i></button></li>
+                    <li><button className="btn-floating green" onClick={(evento) => this.props.selecionarView('CadastroCliente', evento)}><i className="material-icons">add</i></button></li>
+                    <li><button className="btn-floating red"><i className="material-icons" onClick={(evento) => this.props.selecionarView('DeleteCliente', evento)}>delete</i></button></li>
+                    <li><button className="btn-floating yellow darken-1"><i className="material-icons" onClick={(evento) => this.props.selecionarView('AtualizaCliente', evento)}>edit</i></button></li>
                     <li><button className="btn-floating blue"><i className="material-icons">shopping_cart</i></button></li>
                     <li><button className="btn-floating blue-grey darken-1" onClick={(evento) => this.props.selecionarView('Clientes', evento)}><i className="material-icons">home</i></button></li>
                 </ul>
