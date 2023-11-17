@@ -18,7 +18,7 @@ function formatCPF(cpf: string) {
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
 }
 
-export default class ListaCliente extends Component<props, state> {
+export default class ListagemClientes extends Component<props, state> {
     constructor(props: props) {
         super(props)
         this.state = {
@@ -33,7 +33,7 @@ export default class ListaCliente extends Component<props, state> {
         console.log(this.props.clientes)
         let estilo = `collection-item active ${this.props.tema}`
         return (
-            <div className="row">
+            <div className="row container">
                 <BotaoCliente selecionarView={this.props.selecionarView}/>
                 <div className="col s12">
                     <ul className="collection with-header">

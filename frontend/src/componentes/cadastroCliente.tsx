@@ -16,7 +16,7 @@ type props = {
     selecionarView: (novaTela: string, evento: React.MouseEvent) => void
 }
 
-export default class ClienteForm extends React.Component<props> {
+export default class CadastroCliente extends React.Component<props> {
     componentDidMount() {
         M.FormSelect.init(document.querySelectorAll('select'))
         M.CharacterCounter.init(document.querySelectorAll('input'))
@@ -144,104 +144,105 @@ export default class ClienteForm extends React.Component<props> {
         const BotaoCliente = this.props.BotaoCliente
         let estiloBotao = `btn waves-effect waves-light ${this.props.tema}`
         return (
-            <div className="row">
-                <BotaoCliente selecionarView={this.props.selecionarView}/>
-                <form className="col s12" onSubmit={this.handleSubmit}>
-                    <div className="row">
-                        <div className="input-field col s6">
-                            <input required id="nome" type="text" className="validate" value={this.state.cliente.nome || ''} onChange={this.handleChange} />
-                            <label htmlFor="nome">Nome Completo<span className="red-text"> *</span></label>
-                        </div>
-                        <div className="input-field col s6">
-                            <input id="nomeSocial" type="text" className="validate" value={this.state.cliente.nomeSocial || ''} onChange={this.handleChange} />
-                            <label htmlFor="nomeSocial">Nome Social</label>
-                        </div>
-                        <div className="input-field col s12">
-                            <select id="genero" value={this.state.cliente.genero || ''} onChange={this.handleChangeGenero}>
-                                <option value="" disabled selected>Escolha o gênero</option>
-                                <option value="Masculino">Masculino</option>
-                                <option value="Feminino">Feminino</option>
-                            </select>
-                            <label htmlFor="genero">Gênero<span className="red-text"> *</span></label>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="input-field col s6">
-                            <input required id="cpfValor" type="text" className="validate" data-length="11" value={this.state.cpfValor || ''} onChange={this.handleChange} />
-                            <label htmlFor="cpfValor">CPF<span className="red-text"> *</span></label>
-                            <span className="helper-text" data-error="Incorreto" data-success="Correto"></span>
-                        </div>
-                        <div className="input-field col s6">
-                            <input required id="cpfDataEmissao" type="date" className="validate" value={this.state.cpfDataEmissao || ''} onChange={this.handleChange} />
-                            <label htmlFor="cpfDataEmissao">Data de Emissão do CPF<span className="red-text"> *</span></label>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className='col s6'>
+            <div className="container">
+                <div className="row">
+                    <BotaoCliente selecionarView={this.props.selecionarView} />
+                    <form className="col s12" onSubmit={this.handleSubmit}>
+                        <h4>Cadastro de Clientes</h4>
+                        <div className="row">
                             <div className="input-field col s6">
+                                <input required id="nome" type="text" className="validate" value={this.state.cliente.nome || ''} onChange={this.handleChange} />
+                                <label htmlFor="nome">Nome Completo<span className="red-text"> *</span></label>
+                            </div>
+                            <div className="input-field col s6">
+                                <input id="nomeSocial" type="text" className="validate" value={this.state.cliente.nomeSocial || ''} onChange={this.handleChange} />
+                                <label htmlFor="nomeSocial">Nome Social</label>
+                            </div>
+                            <div className="input-field col s12">
+                                <select id="genero" value={this.state.cliente.genero || ''} onChange={this.handleChangeGenero}>
+                                    <option value="" disabled selected>Escolha o gênero</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Feminino">Feminino</option>
+                                </select>
+                                <label htmlFor="genero">Gênero<span className="red-text"> *</span></label>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="input-field col s6">
+                                <input required id="cpfValor" type="text" className="validate" data-length="11" value={this.state.cpfValor || ''} onChange={this.handleChange} />
+                                <label htmlFor="cpfValor">CPF<span className="red-text"> *</span></label>
+                                <span className="helper-text" data-error="Incorreto" data-success="Correto"></span>
+                            </div>
+                            <div className="input-field col s6">
+                                <input required id="cpfDataEmissao" type="date" className="validate" value={this.state.cpfDataEmissao || ''} onChange={this.handleChange} />
+                                <label htmlFor="cpfDataEmissao">Data de Emissão do CPF<span className="red-text"> *</span></label>
+                            </div>
+                        </div>
+                        <div className="row">
+                            <div className="input-field col s3">
                                 <input id="rgValor" type="text" className="validate" data-length="9" value={this.state.rgValor || ''} onChange={this.handleChange} />
                                 <label htmlFor="rgValor">RG</label>
                             </div>
-                            <div className="input-field col s6">
+                            <div className="input-field col s3">
                                 <input id="rgDataEmissao" type="date" className="validate" value={this.state.rgDataEmissao || ''} onChange={this.handleChange} />
                                 <label htmlFor="rgDataEmissao">Data de Emissão do RG</label>
                             </div>
-                            <div className='col s12'>
-                                <button className="btn waves-effect waves-light" type="button" onClick={this.handleSubmitRGS} disabled={!this.state.rgValor || !this.state.rgDataEmissao}>Adicionar RG</button>
-                            </div>
-                        </div>
-                        <div className='col s6'>
-                            <div className="input-field col s6">
+                            <div className="input-field col s3">
                                 <input id="ddd" type="text" className="validate" data-length="2" value={this.state.ddd || ''} onChange={this.handleChange} />
                                 <label htmlFor="ddd">DDD</label>
                             </div>
-                            <div className="input-field col s6">
+                            <div className="input-field col s3">
                                 <input id="telefone" type="text" className="validate" data-length="10" value={this.state.telefone || ''} onChange={this.handleChange} />
                                 <label htmlFor="telefone">Telefone</label>
                             </div>
-                            <div className='col s12'>
+                        </div>
+                        <div className='row'>
+                            <div className='col s6'>
+                                <button className="btn waves-effect waves-light" type="button" onClick={this.handleSubmitRGS} disabled={!this.state.rgValor || !this.state.rgDataEmissao}>Adicionar RG</button>
+                            </div>
+                            <div className='col s6'>
                                 <button className="btn waves-effect waves-light" type="button" onClick={this.handleSubmitTelefones} disabled={!this.state.ddd || !this.state.telefone}>Adicionar Telefone</button>
                             </div>
                         </div>
-                    </div>
-                    <div className='row'>
-                        <div className='col s6'>
-                            <div className="card" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                <div className="card-content">
-                                    <span className="card-title">RGs adicionados:</span>
-                                    <ul className="collection">
-                                        {this.state.rgs.map((rg, index) => (
-                                            <li key={index} className="collection-item">
-                                                RG: {rg.getValor}, Emissão: {rg.getDataEmissao.toDateString()}
-                                            </li>
-                                        ))}
-                                    </ul>
+                        <div className='row'>
+                            <div className='col s6'>
+                                <div className="card" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                    <div className="card-content">
+                                        <span className="card-title">RGs adicionados:</span>
+                                        <ul className="collection">
+                                            {this.state.rgs.map((rg, index) => (
+                                                <li key={index} className="collection-item">
+                                                    RG: {rg.getValor}, Emissão: {rg.getDataEmissao.toDateString()}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className='col s6'>
+                                <div className="card" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                    <div className="card-content">
+                                        <span className="card-title">Telefones:</span>
+                                        <ul className="collection">
+                                            {this.state.telefones.map((telefone, index) => (
+                                                <li key={index} className="collection-item">
+                                                    Telefone: ({telefone.getDdd}) {telefone.getNumero}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div className='col s6'>
-                            <div className="card" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                <div className="card-content">
-                                    <span className="card-title">Telefones:</span>
-                                    <ul className="collection">
-                                        {this.state.telefones.map((telefone, index) => (
-                                            <li key={index} className="collection-item">
-                                                Telefone: ({telefone.getDdd}) {telefone.getNumero}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
+                        <div className="row">
+                            <div className="col s12">
+                                <button className={estiloBotao} type="submit" name="action" disabled={!this.state.cliente.nome || !this.state.cliente.genero || !this.state.cpfValor || !this.state.cpfDataEmissao}>Submit
+                                    <i className="material-icons right">send</i>
+                                </button>
                             </div>
                         </div>
-                    </div>
-                    <div className="row">
-                        <div className="col s12">
-                            <button className={estiloBotao} type="submit" name="action" disabled={!this.state.cliente.nome || !this.state.cliente.genero || !this.state.cpfValor || !this.state.cpfDataEmissao}>Submit
-                                <i className="material-icons right">send</i>
-                            </button>
-                        </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         )
     }
