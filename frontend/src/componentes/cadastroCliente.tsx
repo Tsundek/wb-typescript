@@ -156,7 +156,7 @@ export default class CadastroCliente extends React.Component<props> {
                             </div>
                             <div className="input-field col s12">
                                 <select id="genero" value={this.state.cliente.genero || ''} onChange={this.handleChangeGenero}>
-                                    <option value="" disabled selected>Escolha o gênero</option>
+                                    <option value="" disabled>Escolha o gênero</option>
                                     <option value="Masculino">Masculino</option>
                                     <option value="Feminino">Feminino</option>
                                 </select>
