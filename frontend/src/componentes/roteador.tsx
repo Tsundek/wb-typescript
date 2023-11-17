@@ -1,9 +1,11 @@
 import { Component } from "react";
 import BarraNavegacao from "./barraNavegacao";
-import ListaCliente from "./listaCliente";
-import ClienteForm from "./clienteForm";
 import Empresa from "../modelos/empresa";
 import BotaoCliente from "./btnCliente";
+import ListagemClientes from "./listagemClientes";
+import CadastroCliente from "./cadastroCliente";
+import DeleteCliente from "./deleteCliente";
+import AtualizacaoCliente from "./atualizacaoCliente";
 
 type state = {
     tela: string,
@@ -34,31 +36,43 @@ export default class Roteador extends Component<{}, state> {
     }
 
     render() {
-        let barraNavegacao = <BarraNavegacao seletorView={this.selecionarView} tema="purple lighten-4" botoes={['Clientes', 'Serviços', 'Produtos', 'Cadastro']} />
+        let barraNavegacao = <BarraNavegacao seletorView={this.selecionarView} tema="purple lighten-4" botoes={['Clientes', 'Serviços', 'Produtos']} />
         if (this.state.tela === 'Clientes') {
             return (
                 <>
                     {barraNavegacao}
-                    <ListaCliente tema="purple lighten-4" clientes={this.state.empresa.getClientes} selecionarView={this.selecionarView} BotaoCliente={BotaoCliente}/>
+                    <ListagemClientes tema="purple lighten-4" clientes={this.state.empresa.getClientes} selecionarView={this.selecionarView} BotaoCliente={BotaoCliente} />
                 </>
             )
-        } else if (this.state.tela === 'Serviços') {
-
+        } else if (this.state.tela === 'DeleteCliente') {
+            return (
+                <>
+                    {barraNavegacao}
+                    <DeleteCliente tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={this.state.empresa} selecionarView={this.selecionarView} BotaoCliente={BotaoCliente} />
+                </>
+            )
+        } else if (this.state.tela === 'CadastroCliente') {
+            return (
+                <>
+                    {barraNavegacao}
+                    <CadastroCliente tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={this.state.empresa} selecionarView={this.selecionarView} BotaoCliente={BotaoCliente} />
+                </>
+            )
+        } else if (this.state.tela === 'AtualizaCliente') {
+            return (
+                <>
+                    {barraNavegacao}
+                    <AtualizacaoCliente tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={this.state.empresa} selecionarView={this.selecionarView} BotaoCliente={BotaoCliente} />
+                </>
+            )
         } else if (this.state.tela === 'Produtos') {
 
         }
-        else if (this.state.tela === 'Cadastro') {
+        else {
             return (
                 <>
                     {barraNavegacao}
-                    <ClienteForm tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={this.state.empresa} selecionarView={this.selecionarView} BotaoCliente={BotaoCliente}/>
-                </>
-            )
-        } else {
-            return (
-                <>
-                    {barraNavegacao}
-                    <ClienteForm tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={this.state.empresa} selecionarView={this.selecionarView} BotaoCliente={BotaoCliente}/>
+                    <CadastroCliente tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={this.state.empresa} selecionarView={this.selecionarView} BotaoCliente={BotaoCliente} />
                 </>
             )
         }
