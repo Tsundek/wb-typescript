@@ -2,7 +2,6 @@ import React from 'react'
 import 'materialize-css/dist/css/materialize.min.css'
 import M from 'materialize-css'
 import Empresa from '../modelos/empresa'
-import BotaoCliente from './btnCliente'
 import Cliente from '../modelos/cliente'
 import CPF from '../modelos/cpf'
 import RG from '../modelos/rg'
@@ -12,7 +11,6 @@ type props = {
     tema: string,
     onSubmit: (empresa: Empresa) => void
     empresa: Empresa
-    BotaoCliente: typeof BotaoCliente
     selecionarView: (novaTela: string, evento: React.MouseEvent) => void
 }
 
@@ -21,6 +19,7 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
         M.Tooltip.init(document.querySelectorAll('.tooltipped'), { enterDelay: 250 })
         M.FormSelect.init(document.querySelectorAll('select'))
         M.CharacterCounter.init(document.querySelectorAll('input'))
+        M.updateTextFields()
     }
     constructor(props: props | Readonly<props>) {
         super(props)
@@ -39,17 +38,8 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
         })
         var elems = document.querySelectorAll('.modal')
         var instances = M.Modal.init(elems)
+        M.updateTextFields()
         instances[0].open()
-    }
-    handleConfirm = () => {
-        if (this.state.indice) {
-            this.props.empresa.deletarClientes(this.state.indice)
-            this.props.onSubmit(this.state.empresa)
-        }
-        this.setState({
-            indice: -1,
-            empresa: this.state.empresa
-        })
     }
 
     handleChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>, index?: number) => {
@@ -105,36 +95,34 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
     }
 
     render() {
-        const BotaoCliente = this.props.BotaoCliente
         return (
             <><div className="row container">
-                <div>
-                    <BotaoCliente selecionarView={this.props.selecionarView} />
-                </div>
                 <div className='row'>
                     <div className='col s12'>
                         <h4>Atualizar Clientes</h4>
-                        <table className='highlight col s12'>
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Nome</th>
-                                    <th>Gênero</th>
-                                    <th>CPF</th>
-                                </tr>
-                            </thead>
-                            {this.props.empresa.getClientes.map((cliente, index) => (
-                                <tbody>
-                                    <tr className='' onClick={() => this.handleOpenModal(index)}>
-                                        <td>{index}</td>
-                                        <td className="truncate tooltipped" data-position="top" data-tooltip={cliente.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{cliente.nomeSocial ? `${cliente.nomeSocial}` : `${cliente.nome}`}</td>
-                                        <td>{cliente.genero}</td>
-                                        <td>{cliente.cpf.getValor}</td>
-                                        <td><button className="btn-floating yellow darken-3 btn-small"><i className="material-icons">edit</i></button></td>
+                        <div style={{ maxHeight: 620, overflowY: 'auto' }}>
+                            <table className='highlight col s12'>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Nome</th>
+                                        <th>Gênero</th>
+                                        <th>CPF</th>
                                     </tr>
+                                </thead>
+                                <tbody>
+                                    {this.props.empresa.getClientes.map((cliente, index) => (
+                                        <tr className='' onClick={() => this.handleOpenModal(index)}>
+                                            <td>{index}</td>
+                                            <td className="truncate tooltipped" data-position="top" data-tooltip={cliente.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{cliente.nomeSocial ? `${cliente.nomeSocial}` : `${cliente.nome}`}</td>
+                                            <td>{cliente.genero}</td>
+                                            <td>{cliente.cpf.getValor}</td>
+                                            <td><button className="btn-floating yellow darken-3 btn-small"><i className="material-icons">edit</i></button></td>
+                                        </tr>
+                                    ))}
                                 </tbody>
-                            ))}
-                        </table>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div id="modal1" className="modal modal-fixed-footer">
@@ -144,11 +132,11 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
                             <div className="row">
                                 <div className="input-field col s6">
                                     <input id="nome" type="text" className="validate" value={this.state.clienteSelecionado.nome} onChange={this.handleChange} />
-                                    <label htmlFor="nome">Nome Completo</label>
+                                    <label htmlFor="nome" className="active">Nome Completo</label>
                                 </div>
                                 <div className="input-field col s6">
                                     <input id="nomeSocial" type="text" className="validate" value={this.state.clienteSelecionado.nomeSocial} onChange={this.handleChange} />
-                                    <label htmlFor="nomeSocial">Nome Social</label>
+                                    <label htmlFor="nomeSocial" className="active">Nome Social</label>
                                 </div>
                                 <div className="input-field col s12">
                                     <select id="genero" value={this.state.clienteSelecionado.genero} onChange={this.handleChange}>
@@ -161,8 +149,8 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
                             </div>
                             <div className="row">
                                 <div className="input-field col s6">
-                                    <input id="cpf" type="text" className="validate" data-length="11" value={this.state.clienteSelecionado.cpf ? this.state.clienteSelecionado.cpf.getValor : ''} onChange={this.handleChange} />
-                                    <label htmlFor="cpf">CPF</label>
+                                    <input id="cpf" type="number" className="validate" data-length="11" value={this.state.clienteSelecionado.cpf ? this.state.clienteSelecionado.cpf.getValor : ''} onChange={this.handleChange} />
+                                    <label htmlFor="cpf" className="active">CPF</label>
                                     <span className="helper-text" data-error="Incorreto" data-success="Correto"></span>
                                 </div>
                                 <div className="input-field col s6">
@@ -171,8 +159,8 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
                                 </div>
                             </div>
                             <div className="row">
-                                <div className='col s6'>
-                                    <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                <div className='col s7'>
+                                    <div style={{ maxHeight: 230, overflowY: 'auto' }}>
                                         <table>
                                             <thead>
                                                 <tr>
@@ -187,7 +175,7 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
                                                     <tbody>
                                                         <tr>
                                                             <td>{index}</td>
-                                                            <td><input id='rg' className="validate" data-length="9" type='text' value={rg.getValor} onChange={(event) => this.handleChange(event, index)}></input></td>
+                                                            <td><input id='rg' className="validate" data-length="9" type='number' value={rg.getValor} onChange={(event) => this.handleChange(event, index)}></input></td>
                                                             <td><input id="rgDataEmissao" type="date" className="validate" value={rg && rg.getDataEmissao ? rg.getDataEmissao.toISOString().split('T')[0] : ''} onChange={(event) => this.handleChange(event, index)} /></td>
                                                         </tr>
                                                     </tbody>
@@ -197,29 +185,31 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
                                         </table>
                                     </div>
                                 </div>
-                                <div className='col s6'>
-                                    <table>
-                                        <thead>
-                                            <tr>
-                                                <th>#</th>
-                                                <th>DDD</th>
-                                                <th>Telefone</th>
-                                            </tr>
-                                        </thead>
-                                        {
-                                            this.state.clienteSelecionado.telefones.map((telefone, index) => (
+                                <div className='col s5'>
+                                    <div style={{ maxHeight: 230, overflowY: 'auto' }}>
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>DDD</th>
+                                                    <th>Telefone</th>
+                                                </tr>
+                                            </thead>
+                                            {
+                                                this.state.clienteSelecionado.telefones.map((telefone, index) => (
 
-                                                <tbody>
-                                                    <tr>
-                                                        <td>{index}</td>
-                                                        <td><input id='ddd' className="validate" data-length="2" type='text' value={telefone.getDdd} onChange={(event) => this.handleChange(event, index)}></input></td>
-                                                        <td><input id="telefone" type="text" className="validate" value={telefone.getNumero} onChange={(event) => this.handleChange(event, index)} /></td>
-                                                    </tr>
-                                                </tbody>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>{index}</td>
+                                                            <td><input id='ddd' className="validate" data-length="2" type='number' value={telefone.getDdd} onChange={(event) => this.handleChange(event, index)}></input></td>
+                                                            <td><input id="telefone" type="number" className="validate" value={telefone.getNumero} onChange={(event) => this.handleChange(event, index)} /></td>
+                                                        </tr>
+                                                    </tbody>
 
-                                            ))
-                                        }
-                                    </table>
+                                                ))
+                                            }
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>

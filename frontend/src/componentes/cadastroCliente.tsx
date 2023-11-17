@@ -6,13 +6,11 @@ import Telefone from '../modelos/telefone'
 import 'materialize-css/dist/css/materialize.min.css'
 import M from 'materialize-css'
 import Empresa from '../modelos/empresa'
-import BotaoCliente from './btnCliente'
 
 type props = {
     tema: string,
     onSubmit: (empresa: Empresa) => void
     empresa: Empresa
-    BotaoCliente: typeof BotaoCliente
     selecionarView: (novaTela: string, evento: React.MouseEvent) => void
 }
 
@@ -141,12 +139,10 @@ export default class CadastroCliente extends React.Component<props> {
     }
 
     render() {
-        const BotaoCliente = this.props.BotaoCliente
         let estiloBotao = `btn waves-effect waves-light ${this.props.tema}`
         return (
             <div className="container">
                 <div className="row">
-                    <BotaoCliente selecionarView={this.props.selecionarView} />
                     <form className="col s12" onSubmit={this.handleSubmit}>
                         <h4>Cadastro de Clientes</h4>
                         <div className="row">
@@ -169,7 +165,7 @@ export default class CadastroCliente extends React.Component<props> {
                         </div>
                         <div className="row">
                             <div className="input-field col s6">
-                                <input required id="cpfValor" type="text" className="validate" data-length="11" value={this.state.cpfValor || ''} onChange={this.handleChange} />
+                                <input required id="cpfValor" type="number" className="validate" data-length="11" value={this.state.cpfValor || ''} onChange={this.handleChange} />
                                 <label htmlFor="cpfValor">CPF<span className="red-text"> *</span></label>
                                 <span className="helper-text" data-error="Incorreto" data-success="Correto"></span>
                             </div>
@@ -180,7 +176,7 @@ export default class CadastroCliente extends React.Component<props> {
                         </div>
                         <div className="row">
                             <div className="input-field col s3">
-                                <input id="rgValor" type="text" className="validate" data-length="9" value={this.state.rgValor || ''} onChange={this.handleChange} />
+                                <input id="rgValor" type="number" className="validate" data-length="9" value={this.state.rgValor || ''} onChange={this.handleChange} />
                                 <label htmlFor="rgValor">RG</label>
                             </div>
                             <div className="input-field col s3">
@@ -188,11 +184,11 @@ export default class CadastroCliente extends React.Component<props> {
                                 <label htmlFor="rgDataEmissao">Data de Emissão do RG</label>
                             </div>
                             <div className="input-field col s3">
-                                <input id="ddd" type="text" className="validate" data-length="2" value={this.state.ddd || ''} onChange={this.handleChange} />
+                                <input id="ddd" type="number" className="validate" data-length="2" value={this.state.ddd || ''} onChange={this.handleChange} />
                                 <label htmlFor="ddd">DDD</label>
                             </div>
                             <div className="input-field col s3">
-                                <input id="telefone" type="text" className="validate" data-length="10" value={this.state.telefone || ''} onChange={this.handleChange} />
+                                <input id="telefone" type="number" className="validate" data-length="10" value={this.state.telefone || ''} onChange={this.handleChange} />
                                 <label htmlFor="telefone">Telefone</label>
                             </div>
                         </div>
