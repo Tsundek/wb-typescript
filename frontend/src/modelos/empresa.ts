@@ -71,4 +71,19 @@ export default class Empresa {
             alert ("Indice inválido")
         }
     }
+
+    public registrarConsumo(cliente: Cliente, produto?: Produto, servico?: Servico) {
+        if (produto) {
+            cliente.consumirProduto(produto)
+        }
+        else if (servico) {
+            cliente.consumirServico(servico)
+        } else {
+            alert("Selecione um produto ou serviço")
+        }
+        const index = this._clientes.findIndex(c => c === cliente)
+        if (index !== -1) {
+            this._clientes[index] = cliente
+        }
+    }
 }

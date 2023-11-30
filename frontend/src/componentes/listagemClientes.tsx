@@ -1,7 +1,9 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import { Component } from "react";
 import 'materialize-css/dist/css/materialize.min.css'
 import Cliente from "../modelos/cliente";
+import ListaClientes from "./listaClientes";
+import ListaClientesGenero from "./listaClienteGenero";
+import ListaMenosProdutosConsumidos from "./listaMenosProdutosConsumidos";
 
 type state = {
     selectedCliente: Cliente | null
@@ -11,9 +13,7 @@ type props = {
     tema: string,
     clientes: Array<Cliente>
     selecionarView: (novaTela: string, evento: React.MouseEvent) => void
-}
-function formatCPF(cpf: string) {
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    onClienteSelect: (cliente: Cliente) => void
 }
 
 export default class ListagemClientes extends Component<props, state> {
@@ -23,41 +23,47 @@ export default class ListagemClientes extends Component<props, state> {
             selectedCliente: null
         }
     }
+    handleResize = () => {
+        this.forceUpdate();
+    }
+    componentWillUnmount() {
+        window.removeEventListener('resize', this.handleResize);
+    }
     componentDidMount() {
         M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'))
+        M.Tabs.init(document.querySelectorAll('.tabs'), { swipeable: false })
+        window.addEventListener('resize', this.handleResize)
     }
     render() {
-        let estilo = `collection-item active ${this.props.tema}`
         return (
             <div className="row container">
-                <div className="col s12">
-                    <ul className="collection with-header">
-                        <li className="collection-header">
-                            <div className="row valign-wrapper">
-                                <h4>Lista de Clientes</h4>
-                            </div>
-                        </li>
-                        <ul className="tabs">
-                            <li className="tab col s3"><a href="#test1">Test 1</a></li>
-                            <li className="tab col s3"><a className="active" href="#test2">Test 2</a></li>
-                            <li className="tab col s3 disabled"><a href="#test3">Disabled Tab</a></li>
-                            <li className="tab col s3"><a href="#test4">Test 4</a></li>
-                        </ul>
-                        <div style={{ maxHeight: "587px", overflowY: "auto" }}>
-                            {this.props.clientes.map((cliente, index) => (
-                                <a href="#!" className={`collection-item avatar black-text ${cliente === this.state.selectedCliente ? estilo : ''}`} key={index} onClick={() => this.setState({ selectedCliente: cliente })}>
-                                    <i className="material-icons medium circle">account_circle</i>
-                                    <span className="title">{cliente.nomeSocial ? `Nome Social: ${cliente.nomeSocial}` : `Nome: ${cliente.nome}`}</span>
-                                    <p>
-                                        Gênero: {cliente.genero}
-                                        <br />
-                                        CPF: {formatCPF(cliente.cpf.getValor)}
-                                    </p>
-                                </a>
-                            ))}
+                <ul className="collection with-header" style={{ overflow: "hidden" }}>
+                    <li className="collection-header">
+                        <div className="row valign-wrapper">
+                            <h4>Lista de Clientes</h4>
                         </div>
+                    </li>
+                    <ul className="tabs" style={{ paddingBottom: '5rem' }}>
+                        <li className="tab"><a href="#ListaClientes">Geral</a></li>
+                        <li className="tab"><a href="#ListaClientesGenero">Gênero</a></li>
+                        <li className="tab"><a href="#ListaMenosProdutosConsumidos">Menos Produtos Consumidos</a></li>
+                        <li className="tab"><a href="#test4">Menos Serviços Consumidos</a></li>
+                        <li className="tab"><a href="#test5">Mais Produtos Consumidos</a></li>
+                        <li className="tab"><a href="#test6">Mais Serviços Consumidos</a></li>
+                        <li className="tab"><a href="#test7">Maior Valor Consumido</a></li>
                     </ul>
-                </div>
+                    <div className="tabs-content">
+                        <div id="ListaClientes" style={{ maxHeight: 660, overflowY: "auto" }}>
+                            <ListaClientes tema={"purple lighten-4"} clientes={this.props.clientes} onClienteSelect={this.props.onClienteSelect} />
+                        </div>
+                        <div id="ListaClientesGenero" style={{ maxHeight: 660, overflowY: "auto" }}>
+                            <ListaClientesGenero tema={"purple lighten-4"} clientes={this.props.clientes} />
+                        </div>
+                        <div id="ListaMenosProdutosConsumidos" style={{ maxHeight: 660, overflowY: "auto" }}>
+                            <ListaMenosProdutosConsumidos tema={"purple lighten-4"} clientes={this.props.clientes}/>
+                        </div>
+                    </div>
+                </ul>
             </div>
         )
     }

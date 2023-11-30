@@ -14,7 +14,7 @@ export default class Cliente {
     private _telefones: Array<Telefone>
     private _produtosConsumidos: Array<Produto>
     private _servicosConsumidos: Array<Servico>
-    
+
     constructor(nome: string, nomeSocial: string, genero: string, cpf: CPF) {
         this._nome = nome
         this._nomeSocial = nomeSocial
@@ -96,6 +96,14 @@ export default class Cliente {
 
     public set servicosConsumidos(novosServicosConsumidos: Array<Servico>) {
         this._servicosConsumidos = novosServicosConsumidos;
+    }
+
+    public consumirProduto(produto: Produto) {
+        this._produtosConsumidos.push(produto)
+    }
+
+    public consumirServico(servico: Servico) {
+        this._servicosConsumidos.push(servico)
     }
 
 }

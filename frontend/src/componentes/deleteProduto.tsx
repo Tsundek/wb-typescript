@@ -56,7 +56,7 @@ export default class DeleteProduto extends React.Component<props> {
                                         <tr className='' onClick={() => this.handleOpenModal(index)}>
                                             <td>{index}</td>
                                             <td className="truncate tooltipped" data-position="top" data-tooltip={produto.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{produto.nome}</td>
-                                            <td>R${produto.valor}</td>
+                                            <td>R$ {produto.valor}</td>
                                             <td><button className="btn-floating red btn-small"><i className="material-icons">delete</i></button></td>
                                         </tr>
                                     </tbody>
