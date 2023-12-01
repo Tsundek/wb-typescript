@@ -1,43 +1,36 @@
-import { Component } from "react"
-import BarraNavegacao from "./barraNavegacao"
-import Empresa from "../modelos/empresa"
-import BotaoCliente from "./btnCliente"
-import ListagemClientes from "./listagemClientes"
-import CadastroCliente from "./cadastroCliente"
-import DeleteCliente from "./deleteCliente"
-import AtualizacaoCliente from "./atualizacaoCliente"
-import CadastroProduto from "./cadastroProduto"
-import BotaoProduto from "./btnProduto"
-import ListagemProdutos from "./listagemProduto"
-import AtualizacaoProduto from "./atualizacaoProduto"
-import DeleteProduto from "./deleteProduto"
-import ListagemServicos from "./listagemServicos"
-import BotaoServico from "./btnServico"
-import CadastroServico from "./cadastroServico"
-import AtualizacaoServico from "./atualizacaoServico"
-import DeleteServico from "./deleteServico"
+import { useState } from "react"
+import { BarraNavegacao } from "./barraNavegacao"
+import { ConsumoComponent } from "./consumo"
+
+import { DadosItem } from "./dadosItem"
+import { DeleteItem } from "./deleteItem"
+import { AtualizacaoItem } from "./atualizacaoItem"
+import { CadastroItem } from "./cadastroItem"
+import { ListagemServicos } from "./listagemServicos"
+import { ListagemProdutos } from "./listagemProduto"
+import { BotaoProduto } from "./btnProduto"
+import { BotaoServico } from "./btnServico"
+
+import { ListagemClientes } from "./listagemClientes"
+import { CadastroCliente } from "./cadastroCliente"
+import { DeleteCliente } from "./deleteCliente"
+import { AtualizacaoCliente } from "./atualizacaoCliente"
+import { DadosCliente } from "./dadosCliente"
+import { BotaoCliente } from "./btnCliente"
+
 import Cliente from "../modelos/cliente"
-import ConsumoComponent from "./consumo"
 import CPF from "../modelos/cpf"
 import Servico from "../modelos/servico"
 import Produto from "../modelos/produto"
-import DadosCliente from "./dadosCliente"
 import RG from "../modelos/rg"
 import Telefone from "../modelos/telefone"
-import DadosItem from "./dadosItem"
+import Empresa from "../modelos/empresa"
 
-type state = {
-    tela: string,
-    empresa: Empresa
-    selectedCliente: Cliente | undefined
-    selectedProduto: Produto | undefined
-    selectedServico: Servico | undefined
-}
 
-export default class Roteador extends Component<{}, state> {
-    constructor(props: {} | Readonly<{}>) {
-        super(props)
-        let empresa = new Empresa()
+export const Roteador = () => {
+    const createInitialObjects = () => {
+        const empresa = new Empresa()
+
         empresa.addClientes(new Cliente('João', '', 'Masculino', new CPF('12345678900', new Date('10/09/2000'))))
         empresa.addClientes(new Cliente('Julio', 'Jul', 'Masculino', new CPF('12345678100', new Date('10/09/2000'))))
         empresa.addClientes(new Cliente('Matheus', '', 'Masculino', new CPF('12345678200', new Date('10/09/2000'))))
@@ -90,198 +83,185 @@ export default class Roteador extends Component<{}, state> {
             cliente.telefones.push(telefone)
         }
 
-        this.state = {
-            tela: 'Clientes',
-            empresa: empresa,
-            selectedCliente: undefined,
-            selectedProduto: undefined,
-            selectedServico: undefined
-        }
-        this.selecionarView = this.selecionarView.bind(this)
-        this.atualizarEmpresa = this.atualizarEmpresa.bind(this)
+        return empresa
     }
 
-    selecionarView(novaTela: string, evento: React.MouseEvent) {
+    const [tela, setTela] = useState("Clientes")
+    const [empresa, setEmpresa] = useState(createInitialObjects)
+    const [selectedCliente, setSelectedCliente] = useState<Cliente | undefined>(undefined)
+    const [selectedProduto, setSelectedProduto] = useState<Produto | undefined>(undefined)
+    const [selectedServico, setSelectedServico] = useState<Servico | undefined>(undefined)
+
+    const selecionarView = (novaTela: string, evento: React.MouseEvent) => {
         evento.preventDefault()
-        this.setState({
-            tela: novaTela
-        })
-        this.resetState()
+        setTela(novaTela)
+        resetState()
     }
-    resetState = () => {
-        this.setState({
-            selectedCliente: undefined,
-            selectedProduto: undefined,
-            selectedServico: undefined
-        })
-    }
-    atualizarEmpresa(empresa: Empresa) {
-        this.setState({ empresa })
-    }
-    handleClienteSelect = (cliente: Cliente) => {
-        this.setState({
-            selectedCliente: cliente,
-            tela: 'DadosCliente'
-        })
-    }
-    handleProdutoSelect = (produto: Produto) => {
-        this.setState({
-            selectedProduto: produto,
-            tela: 'DadosProduto'
-        })
-    }
-    handleServicoSelect = (servico: Servico) => {
-        this.setState({
-            selectedServico: servico,
-            tela: 'DadosServiço'
-        })
+    const resetState = () => {
+        setSelectedCliente(undefined)
+        setSelectedProduto(undefined)
+        setSelectedServico(undefined)
     }
 
-    render() {
-        const tema = "purple lighten-4"
-        let barraNavegacao = <BarraNavegacao seletorView={this.selecionarView} tema={tema} botoes={['Clientes', 'Produtos', 'Serviços']} />
-        let botaoCliente = <BotaoCliente selecionarView={this.selecionarView} />
-        let botaoProduto = <BotaoProduto selecionarView={this.selecionarView} />
-        let botaoServico = <BotaoServico selecionarView={this.selecionarView} />
-        const { empresa, selectedCliente, selectedProduto, selectedServico } = this.state
-
-        if (this.state.tela === 'Clientes') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoCliente}
-                    <ListagemClientes tema={tema} clientes={empresa.getClientes} onClienteSelect={this.handleClienteSelect} empresa={empresa} selectedCliente={selectedCliente} />
-                </>
-            )
-        } else if (this.state.tela === 'DadosCliente' && selectedCliente) {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoCliente}
-                    <DadosCliente cliente={selectedCliente} />
-                </>
-            )
-        } else if (this.state.tela === 'DeleteCliente') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoCliente}
-                    <DeleteCliente tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        } else if (this.state.tela === 'CadastroCliente') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoCliente}
-                    <CadastroCliente tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        } else if (this.state.tela === 'AtualizaCliente') {
-            return (
-                <>
-                    {botaoCliente}
-                    {barraNavegacao}
-                    <AtualizacaoCliente tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        } else if (this.state.tela === 'Produtos') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoProduto}
-                    <ListagemProdutos tema={tema} produtos={empresa.getProdutos} empresa={empresa} selecionarView={this.selecionarView} onProdutoSelect={this.handleProdutoSelect} selectedProduto={selectedProduto} />
-                </>
-            )
-        } else if (this.state.tela === 'DadosProduto' && selectedProduto) {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoProduto}
-                    <DadosItem item={selectedProduto} empresa={empresa} tipo={'produto'} />
-                </>
-            )
-        } else if (this.state.tela === 'CadastroProduto') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoProduto}
-                    <CadastroProduto tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        } else if (this.state.tela === 'DeleteProduto') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoProduto}
-                    <DeleteProduto tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        } else if (this.state.tela === 'AtualizacaoProduto') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoProduto}
-                    <AtualizacaoProduto tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        } else if (this.state.tela === 'Serviços') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoServico}
-                    <ListagemServicos tema={tema} servicos={empresa.getServicos} empresa={empresa} selecionarView={this.selecionarView} onServicoSelect={this.handleServicoSelect} selectedServico={selectedServico} />
-                </>
-            )
-        } else if (this.state.tela === 'DadosServiço' && selectedServico) {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoServico}
-                    <DadosItem item={selectedServico} tipo={"servico"} empresa={empresa} />
-                </>
-            )
-        } else if (this.state.tela === 'CadastroServiço') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoServico}
-                    <CadastroServico tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        } else if (this.state.tela === 'DeleteServiço') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoServico}
-                    <DeleteServico tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        } else if (this.state.tela === 'AtualizacaoServiço') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoServico}
-                    <AtualizacaoServico tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        } else if (this.state.tela === 'Consumo') {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoCliente}
-                    <ConsumoComponent tema={tema} clientes={empresa.getClientes} produtos={empresa.getProdutos} empresa={empresa} servicos={empresa.getServicos} />
-                </>
-            )
-        } else {
-            return (
-                <>
-                    {barraNavegacao}
-                    {botaoCliente}
-                    <CadastroCliente tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
-                </>
-            )
-        }
-
+    const atualizarEmpresa = (empresa: Empresa) => {
+        setEmpresa(empresa)
     }
+    const handleClienteSelect = (cliente: Cliente) => {
+        setSelectedCliente(cliente)
+        setTela("DadosCliente")
+    }
+    const handleProdutoSelect = (produto: Produto) => {
+        setSelectedProduto(produto)
+        setTela("DadosProduto")
+    }
+    const handleServicoSelect = (servico: Servico) => {
+        setSelectedServico(servico)
+        setTela("DadosServiço")
+    }
+
+    const tema = "purple lighten-4"
+    const barraNavegacao = (<BarraNavegacao seletorView={selecionarView} tema={tema} botoes={['Clientes', 'Produtos', 'Serviços']} />)
+    const botaoCliente = <BotaoCliente selecionarView={selecionarView} />
+    const botaoProduto = <BotaoProduto selecionarView={selecionarView} />
+    const botaoServico = <BotaoServico selecionarView={selecionarView} />
+
+    if (tela === "Clientes") {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoCliente}
+                <ListagemClientes clientes={empresa.getClientes} onClienteSelect={handleClienteSelect} empresa={empresa} />
+            </>
+        )
+    } else if (tela === 'DadosCliente' && selectedCliente) {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoCliente}
+                <DadosCliente cliente={selectedCliente} />
+            </>
+        )
+    } else if (tela === 'DeleteCliente') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoCliente}
+                <DeleteCliente onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} selecionarView={selecionarView} />
+            </>
+        )
+    } else if (tela === 'CadastroCliente') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoCliente}
+                <CadastroCliente tema={tema} onSubmit={(empresa: Empresa) => atualizarEmpresa(empresa)} empresa={empresa} />
+            </>
+        )
+    } else if (tela === 'AtualizaCliente') {
+        return (
+            <>
+                {botaoCliente}
+                {barraNavegacao}
+                <AtualizacaoCliente onSubmit={(empresa: Empresa) => atualizarEmpresa(empresa)} empresa={empresa} />
+            </>
+        )
+    } else if (tela === 'Produtos') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoProduto}
+                <ListagemProdutos produtos={empresa.getProdutos} onProdutoSelect={handleProdutoSelect} empresa={empresa} />
+            </>
+        )
+    } else if (tela === 'DadosProduto' && selectedProduto) {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoProduto}
+                <DadosItem item={selectedProduto} empresa={empresa} tipo={'produto'} />
+            </>
+        )
+    } else if (tela === 'CadastroProduto') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoProduto}
+                <CadastroItem tema={tema} onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} tipo={"produto"} />
+            </>
+        )
+    } else if (tela === 'DeleteProduto') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoProduto}
+                <DeleteItem onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} items={empresa.getProdutos} tipo={"produto"} />
+            </>
+        )
+    } else if (tela === 'AtualizacaoProduto') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoProduto}
+                <AtualizacaoItem onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} items={empresa.getProdutos} tipo={"produto"} />
+            </>
+        )
+    } else if (tela === 'Serviços') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoServico}
+                <ListagemServicos servicos={empresa.getServicos} empresa={empresa} onServicoSelect={handleServicoSelect} />
+            </>
+        )
+    } else if (tela === 'DadosServiço' && selectedServico) {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoServico}
+                <DadosItem item={selectedServico} tipo={"servico"} empresa={empresa} />
+            </>
+        )
+    } else if (tela === 'CadastroServiço') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoServico}
+                <CadastroItem tema={tema} onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} tipo={"servico"} />
+            </>
+        )
+    } else if (tela === 'DeleteServiço') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoServico}
+                <DeleteItem onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} items={empresa.getServicos} tipo={"servico"} />
+            </>
+        )
+    } else if (tela === 'AtualizacaoServiço') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoServico}
+                <AtualizacaoItem onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} items={empresa.getServicos} tipo={"servico"} />
+            </>
+        )
+    } else if (tela === 'Consumo') {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoCliente}
+                <ConsumoComponent clientes={empresa.getClientes} produtos={empresa.getProdutos} empresa={empresa} servicos={empresa.getServicos} />
+            </>
+        )
+    } else {
+        return (
+            <>
+                {barraNavegacao}
+                {botaoCliente}
+                <ListagemClientes clientes={empresa.getClientes} onClienteSelect={handleClienteSelect} empresa={empresa} />
+            </>
+        )
+    }
+
+
 }   

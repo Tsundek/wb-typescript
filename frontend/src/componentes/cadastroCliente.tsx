@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import Cliente from '../modelos/cliente'
 import CPF from '../modelos/cpf'
 import RG from '../modelos/rg'
@@ -11,236 +11,220 @@ type props = {
     tema: string,
     onSubmit: (empresa: Empresa) => void
     empresa: Empresa
-    selecionarView: (novaTela: string, evento: React.MouseEvent) => void
 }
 
-export default class CadastroCliente extends React.Component<props> {
-    componentDidMount() {
-        M.FormSelect.init(document.querySelectorAll('select'))
-        M.CharacterCounter.init(document.querySelectorAll('input'))
-    }
-    state = {
-        cliente: new Cliente('', '', '', new CPF('', new Date())),
-        cpfValor: '',
-        cpfDataEmissao: '',
-        rgs: new Array<RG>(),
-        rgValor: '',
-        rgDataEmissao: '',
-        telefones: new Array<Telefone>(),
-        ddd: '',
-        telefone: '',
-        empresa: this.props.empresa,
+export const CadastroCliente = ({ onSubmit, empresa, tema }: props) => {
+    const [cliente, setCliente] = useState(new Cliente('', '', '', new CPF('', new Date())))
+    const [cpfValor, setCpfValor] = useState('')
+    const [cpfDataEmissao, setCpfDataEmissao] = useState('')
+    const [rgs, setRgs] = useState<Array<RG>>([])
+    const [rgValor, setRgValor] = useState('')
+    const [rgDataEmissao, setRgDataEmissao] = useState('')
+    const [telefones, setTelefones] = useState<Array<Telefone>>([])
+    const [ddd, setDdd] = useState('')
+    const [telefone, setTelefone] = useState('')
+    const [empresaState, setEmpresaState] = useState(empresa)
 
-    }
+    useEffect(() => {
+        M.FormSelect.init(document.querySelectorAll('select'));
+        M.CharacterCounter.init(document.querySelectorAll('input'));
+    }, [])
 
-    handleSubmitTelefones = (event: React.FormEvent) => {
+    const handleSubmitTelefones = (event: React.FormEvent) => {
         event.preventDefault()
-        const newTelefone = new Telefone(this.state.ddd, this.state.telefone)
-        this.setState(prevState => ({
-            ...prevState,
-            telefones: [...this.state.telefones, newTelefone],
-            ddd: '',
-            telefone: ''
-        }))
+        const newTelefone = new Telefone(ddd, telefone)
+        setTelefones((prevTelefones) => [...prevTelefones, newTelefone])
+        setDdd('')
+        setTelefone('')
     }
 
-    handleSubmitRGS = (event: React.FormEvent) => {
+    const handleSubmitRGS = (event: React.FormEvent) => {
         event.preventDefault()
-        const newRG = new RG(this.state.rgValor, new Date(this.state.rgDataEmissao))
-        this.setState(prevState => ({
-            ...prevState,
-            rgs: [...this.state.rgs, newRG],
-            rgValor: '',
-            rgDataEmissao: ''
-        }))
+        const newRG = new RG(rgValor, new Date(rgDataEmissao))
+        setRgs((prevRgs) => [...prevRgs, newRG])
+        setRgValor('')
+        setRgDataEmissao('')
     }
 
-    handleChangeGenero = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        this.setState({
-            cliente: {
-                ...this.state.cliente,
-                [event.target.id]: event.target.value
-            }
-        })
+    const handleChangeGenero = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const { id, value } = event.target
+        setCliente((prevCliente) => ({
+            ...prevCliente,
+            [id]: value
+        }) as Cliente)
     }
 
-    handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.id === 'cpfValor' || event.target.id === 'cpfDataEmissao') {
+    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = event.target
+        if (id === 'cpfValor' || id === 'cpfDataEmissao') {
             const newCPF = new CPF(
-                event.target.id === 'cpfValor' ? event.target.value : this.state.cpfValor,
-                event.target.id === 'cpfDataEmissao' ? new Date(event.target.value) : this.state.cpfDataEmissao ? new Date(this.state.cpfDataEmissao) : new Date()
+                id === 'cpfValor' ? value : cpfValor,
+                id === 'cpfDataEmissao' ? new Date(value) : cpfDataEmissao
+                    ? new Date(cpfDataEmissao)
+                    : new Date()
             )
-            this.setState({
-                cpfValor: event.target.id === 'cpfValor' ? event.target.value : this.state.cpfValor,
-                cpfDataEmissao: event.target.id === 'cpfDataEmissao' ? event.target.value : this.state.cpfDataEmissao,
-                cliente: {
-                    ...this.state.cliente,
-                    _cpf: newCPF
-                }
-            })
-        }
-        else if (event.target.id === 'rgValor' || event.target.id === 'rgDataEmissao') {
+            setCpfValor(id === 'cpfValor' ? value : cpfValor);
+            setCpfDataEmissao(id === 'cpfDataEmissao' ? value : cpfDataEmissao);
+            setCliente((prevCliente) => ({
+                ...prevCliente,
+                cpf: newCPF
+            }) as Cliente)
+        } else if (id === 'rgValor' || id === 'rgDataEmissao') {
             const newRG = new RG(
-                event.target.id === 'rgValor' ? event.target.value : this.state.rgValor,
-                event.target.id === 'rgDataEmissao' ? new Date(event.target.value) : this.state.rgDataEmissao ? new Date(this.state.rgDataEmissao) : new Date()
-            )
-            this.setState({
-                rgValor: event.target.id === 'rgValor' ? event.target.value : this.state.rgValor,
-                rgDataEmissao: event.target.id === 'rgDataEmissao' ? event.target.value : this.state.rgDataEmissao,
-                cliente: {
-                    ...this.state.cliente,
-                    _rgs: newRG
-                }
-            })
-        } else if (event.target.id === 'ddd' || event.target.id === 'telefone') {
+                id === 'rgValor' ? value : rgValor,
+                id === 'rgDataEmissao' ? new Date(value) : rgDataEmissao
+                    ? new Date(rgDataEmissao)
+                    : new Date()
+            );
+            setRgValor(id === 'rgValor' ? value : rgValor);
+            setRgDataEmissao(id === 'rgDataEmissao' ? value : rgDataEmissao);
+            setCliente((prevCliente) => ({
+                ...prevCliente,
+                rgs: [newRG]
+            }) as Cliente)
+        } else if (id === 'ddd' || id === 'telefone') {
             const newTelefone = new Telefone(
-                event.target.id === 'ddd' ? event.target.value : this.state.ddd,
-                event.target.id === 'telefone' ? event.target.value : this.state.telefone
-            )
-            this.setState({
-                ddd: event.target.id === 'ddd' ? event.target.value : this.state.ddd,
-                telefone: event.target.id === 'telefone' ? event.target.value : this.state.telefone,
-                cliente: {
-                    ...this.state.cliente,
-                    _telefones: newTelefone
-                }
-            })
+                id === 'ddd' ? value : ddd,
+                id === 'telefone' ? value : telefone
+            );
+            setDdd(id === 'ddd' ? value : ddd);
+            setTelefone(id === 'telefone' ? value : telefone);
+            setCliente((prevCliente) => ({
+                ...prevCliente,
+                telefones: [newTelefone]
+            }) as Cliente)
         } else {
-            this.setState({
-                cliente: {
-                    ...this.state.cliente,
-                    [event.target.id]: event.target.value
-                }
-            })
+            setCliente((prevCliente) => ({
+                ...prevCliente,
+                [id]: value
+            }) as Cliente)
         }
     }
 
 
-    handleSubmit = (event: React.FormEvent) => {
-        event.preventDefault()
-        const newCPF = new CPF(this.state.cpfValor, new Date(this.state.cpfDataEmissao))
-        const newCliente = new Cliente(this.state.cliente.nome, this.state.cliente.nomeSocial, this.state.cliente.genero, newCPF)
-        newCliente.rgs = newCliente.rgs.concat(this.state.rgs)
-        newCliente.telefones = newCliente.telefones.concat(this.state.telefones)
-        this.state.empresa.addClientes(newCliente)
-        this.props.onSubmit(this.state.empresa)
-        this.setState({
-            cliente: new Cliente('', '', '', new CPF('', new Date())),
-            cpfValor: '',
-            cpfDataEmissao: '',
-            rgs: new Array<RG>(),
-            rgValor: '',
-            rgDataEmissao: '',
-            telefones: new Array<Telefone>(),
-            ddd: '',
-            telefone: '',
-            empresa: this.state.empresa
-        })
-        M.toast({ html: 'Cliente cadastrado com sucesso!', classes: 'rounded' })
+    const handleSubmit = (event: React.FormEvent) => {
+        event.preventDefault();
+        const newCPF = new CPF(cpfValor, new Date(cpfDataEmissao));
+        const newCliente = new Cliente(cliente.nome, cliente.nomeSocial, cliente.genero, newCPF);
+        newCliente.rgs = newCliente.rgs.concat(rgs);
+        newCliente.telefones = newCliente.telefones.concat(telefones);
+        empresaState.addClientes(newCliente);
+        onSubmit(empresaState);
+        setCliente(new Cliente('', '', '', new CPF('', new Date())));
+        setCpfValor('');
+        setCpfDataEmissao('');
+        setRgs([]);
+        setRgValor('');
+        setRgDataEmissao('');
+        setTelefones([]);
+        setDdd('');
+        setTelefone('');
+        setEmpresaState(empresaState);
+        M.toast({ html: 'Cliente cadastrado com sucesso!', classes: 'rounded green' });
     }
 
-    render() {
-        let estiloBotao = `btn waves-effect waves-light ${this.props.tema}`
-        return (
-            <div className="container">
-                <div className="row">
-                    <form className="col s12" onSubmit={this.handleSubmit}>
-                        <h4>Cadastro de Clientes</h4>
-                        <div className="row">
-                            <div className="input-field col s6">
-                                <input required id="nome" type="text" className="validate" value={this.state.cliente.nome || ''} onChange={this.handleChange} />
-                                <label htmlFor="nome">Nome Completo<span className="red-text"> *</span></label>
-                            </div>
-                            <div className="input-field col s6">
-                                <input id="nomeSocial" type="text" className="validate" value={this.state.cliente.nomeSocial || ''} onChange={this.handleChange} />
-                                <label htmlFor="nomeSocial">Nome Social</label>
-                            </div>
-                            <div className="input-field col s12">
-                                <select id="genero" value={this.state.cliente.genero || ''} onChange={this.handleChangeGenero}>
-                                    <option value="" disabled>Escolha o gênero</option>
-                                    <option value="Masculino">Masculino</option>
-                                    <option value="Feminino">Feminino</option>
-                                </select>
-                                <label htmlFor="genero">Gênero<span className="red-text"> *</span></label>
-                            </div>
+
+    let estiloBotao = `btn waves-effect waves-light ${tema}`
+    return (
+        <div className="container">
+            <div className="row">
+                <form className="col s12" onSubmit={handleSubmit}>
+                    <h4>Cadastro de Clientes</h4>
+                    <div className="row">
+                        <div className="input-field col s6">
+                            <input required id="nome" type="text" className="validate" value={cliente.nome || ''} onChange={handleChange} />
+                            <label htmlFor="nome">Nome Completo<span className="red-text"> *</span></label>
                         </div>
-                        <div className="row">
-                            <div className="input-field col s6">
-                                <input required id="cpfValor" type="number" className="validate" data-length="11" value={this.state.cpfValor || ''} onChange={this.handleChange} />
-                                <label htmlFor="cpfValor">CPF<span className="red-text"> *</span></label>
-                                <span className="helper-text" data-error="Incorreto" data-success="Correto"></span>
-                            </div>
-                            <div className="input-field col s6">
-                                <input required id="cpfDataEmissao" type="date" className="validate" value={this.state.cpfDataEmissao || ''} onChange={this.handleChange} />
-                                <label htmlFor="cpfDataEmissao">Data de Emissão do CPF<span className="red-text"> *</span></label>
-                            </div>
+                        <div className="input-field col s6">
+                            <input id="nomeSocial" type="text" className="validate" value={cliente.nomeSocial || ''} onChange={handleChange} />
+                            <label htmlFor="nomeSocial">Nome Social</label>
                         </div>
-                        <div className="row">
-                            <div className="input-field col s3">
-                                <input id="rgValor" type="number" className="validate" data-length="9" value={this.state.rgValor || ''} onChange={this.handleChange} />
-                                <label htmlFor="rgValor">RG</label>
-                            </div>
-                            <div className="input-field col s3">
-                                <input id="rgDataEmissao" type="date" className="validate" value={this.state.rgDataEmissao || ''} onChange={this.handleChange} />
-                                <label htmlFor="rgDataEmissao">Data de Emissão do RG</label>
-                            </div>
-                            <div className="input-field col s3">
-                                <input id="ddd" type="number" className="validate" data-length="2" value={this.state.ddd || ''} onChange={this.handleChange} />
-                                <label htmlFor="ddd">DDD</label>
-                            </div>
-                            <div className="input-field col s3">
-                                <input id="telefone" type="number" className="validate" data-length="10" value={this.state.telefone || ''} onChange={this.handleChange} />
-                                <label htmlFor="telefone">Telefone</label>
-                            </div>
+                        <div className="input-field col s12">
+                            <select id="genero" value={cliente.genero || ''} onChange={handleChangeGenero}>
+                                <option value="" disabled>Escolha o gênero</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                            </select>
+                            <label htmlFor="genero">Gênero<span className="red-text"> *</span></label>
                         </div>
-                        <div className='row'>
-                            <div className='col s6'>
-                                <button className="btn waves-effect waves-light" type="button" onClick={this.handleSubmitRGS} disabled={!this.state.rgValor || !this.state.rgDataEmissao}>Adicionar RG</button>
-                            </div>
-                            <div className='col s6'>
-                                <button className="btn waves-effect waves-light" type="button" onClick={this.handleSubmitTelefones} disabled={!this.state.ddd || !this.state.telefone}>Adicionar Telefone</button>
-                            </div>
+                    </div>
+                    <div className="row">
+                        <div className="input-field col s6">
+                            <input required id="cpfValor" type="number" className="validate" data-length="11" value={cpfValor || ''} onChange={handleChange} />
+                            <label htmlFor="cpfValor">CPF<span className="red-text"> *</span></label>
+                            <span className="helper-text" data-error="Incorreto" data-success="Correto"></span>
                         </div>
-                        <div className='row'>
-                            <div className='col s6'>
-                                <div className="card" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                    <div className="card-content">
-                                        <span className="card-title">RGs adicionados:</span>
-                                        <ul className="collection">
-                                            {this.state.rgs.map((rg, index) => (
-                                                <li key={index} className="collection-item">
-                                                    RG: {rg.getValor}, Emissão: {rg.getDataEmissao.toDateString()}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className='col s6'>
-                                <div className="card" style={{ maxHeight: '200px', overflowY: 'auto' }}>
-                                    <div className="card-content">
-                                        <span className="card-title">Telefones:</span>
-                                        <ul className="collection">
-                                            {this.state.telefones.map((telefone, index) => (
-                                                <li key={index} className="collection-item">
-                                                    Telefone: ({telefone.getDdd}) {telefone.getNumero}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                        <div className="input-field col s6">
+                            <input required id="cpfDataEmissao" type="date" className="validate" value={cpfDataEmissao || ''} onChange={handleChange} />
+                            <label htmlFor="cpfDataEmissao">Data de Emissão do CPF<span className="red-text"> *</span></label>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="input-field col s3">
+                            <input id="rgValor" type="number" className="validate" data-length="9" value={rgValor || ''} onChange={handleChange} />
+                            <label htmlFor="rgValor">RG</label>
+                        </div>
+                        <div className="input-field col s3">
+                            <input id="rgDataEmissao" type="date" className="validate" value={rgDataEmissao || ''} onChange={handleChange} />
+                            <label htmlFor="rgDataEmissao">Data de Emissão do RG</label>
+                        </div>
+                        <div className="input-field col s3">
+                            <input id="ddd" type="number" className="validate" data-length="2" value={ddd || ''} onChange={handleChange} />
+                            <label htmlFor="ddd">DDD</label>
+                        </div>
+                        <div className="input-field col s3">
+                            <input id="telefone" type="number" className="validate" data-length="10" value={telefone || ''} onChange={handleChange} />
+                            <label htmlFor="telefone">Telefone</label>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className='col s6'>
+                            <button className="btn waves-effect waves-light" type="button" onClick={handleSubmitRGS} disabled={!rgValor || !rgDataEmissao}>Adicionar RG</button>
+                        </div>
+                        <div className='col s6'>
+                            <button className="btn waves-effect waves-light" type="button" onClick={handleSubmitTelefones} disabled={!ddd || !telefone}>Adicionar Telefone</button>
+                        </div>
+                    </div>
+                    <div className='row'>
+                        <div className='col s6'>
+                            <div className="card" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                <div className="card-content">
+                                    <span className="card-title">RGs adicionados:</span>
+                                    <ul className="collection">
+                                        {rgs.map((rg, index) => (
+                                            <li key={index} className="collection-item">
+                                                RG: {rg.getValor}, Emissão: {rg.getDataEmissao.toDateString()}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             </div>
                         </div>
-                        <div className="row">
-                            <div className="col s12">
-                                <button className={estiloBotao} type="submit" name="action" disabled={!this.state.cliente.nome || !this.state.cliente.genero || !this.state.cpfValor || !this.state.cpfDataEmissao}>Submit
-                                    <i className="material-icons right">send</i>
-                                </button>
+                        <div className='col s6'>
+                            <div className="card" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+                                <div className="card-content">
+                                    <span className="card-title">Telefones:</span>
+                                    <ul className="collection">
+                                        {telefones.map((telefone, index) => (
+                                            <li key={index} className="collection-item">
+                                                Telefone: ({telefone.getDdd}) {telefone.getNumero}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                    <div className="row">
+                        <div className="col s12">
+                            <button className={estiloBotao} type="submit" name="action" disabled={!cliente.nome || !cliente.genero || !cpfValor || !cpfDataEmissao}>Submit
+                                <i className="material-icons right">send</i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
             </div>
-        )
-    }
+        </div>
+    )
+
 }
