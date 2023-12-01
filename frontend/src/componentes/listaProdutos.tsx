@@ -3,17 +3,14 @@ import { Component } from "react";
 import 'materialize-css/dist/css/materialize.min.css'
 import Produto from "../modelos/produto";
 
-type state = {
-    selectedProduto: Produto | null
-}
-
 type props = {
     tema: string,
     produtos: Array<Produto>
     onProdutoSelect: (produto: Produto) => void
+    selectedProduto: Produto | undefined
 }
 
-export default class ListaProdutos extends Component<props, state> {
+export default class ListaProdutos extends Component<props> {
     constructor(props: props) {
         super(props)
         this.state = {
@@ -31,14 +28,14 @@ export default class ListaProdutos extends Component<props, state> {
         let estilo = `collection-item active ${this.props.tema}`
         return (
             <>
-                <div className='truncate'>
+                <div>
                     {
                         this.props.produtos.map((produto, index) => (
-                            <a href="#!" className={`collection-item avatar black-text ${produto === this.state.selectedProduto ? estilo : ''}`} key={index} onClick={() => this.handleProdutoClick(produto)}>
+                            <a className={`collection-item avatar black-text truncate ${produto === this.props.selectedProduto ? estilo : ''}`} key={index} onClick={() => this.handleProdutoClick(produto)}>
                                 <i className="material-icons medium circle">shopping_cart</i>
-                                <span className="title">{produto.nome}</span>
+                                <span className="title">Nome do produto: {produto.nome}</span>
                                 <p>
-                                    Valor: R$ {produto.valor}
+                                    Valor: R${produto.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                 </p>
                             </a>
                         ))

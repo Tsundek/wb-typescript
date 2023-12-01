@@ -21,11 +21,17 @@ import ConsumoComponent from "./consumo"
 import CPF from "../modelos/cpf"
 import Servico from "../modelos/servico"
 import Produto from "../modelos/produto"
+import DadosCliente from "./dadosCliente"
+import RG from "../modelos/rg"
+import Telefone from "../modelos/telefone"
+import DadosItem from "./dadosItem"
 
 type state = {
     tela: string,
     empresa: Empresa
-    selectedCliente: Cliente | null
+    selectedCliente: Cliente | undefined
+    selectedProduto: Produto | undefined
+    selectedServico: Servico | undefined
 }
 
 export default class Roteador extends Component<{}, state> {
@@ -48,17 +54,48 @@ export default class Roteador extends Component<{}, state> {
         empresa.addProdutos(new Produto('Condicionador', 20))
         empresa.addProdutos(new Produto('Maquina de cortar cabelo', 200))
         empresa.addProdutos(new Produto('Batom', 10))
+        empresa.addProdutos(new Produto('Pomada', 37))
+        empresa.addProdutos(new Produto('Kit de Barba', 249))
+        empresa.addProdutos(new Produto('Óleo para cabelo', 20))
+        empresa.addProdutos(new Produto('Perfume', 90))
+        empresa.addProdutos(new Produto('Felicidade', 1))
+
 
         empresa.addServicos(new Servico('Corte de cabelo', 50))
         empresa.addServicos(new Servico('Massagem', 50))
         empresa.addServicos(new Servico('Depilação', 100))
         empresa.addServicos(new Servico('Coach', 5000))
         empresa.addServicos(new Servico('Botox', 160))
+        empresa.addServicos(new Servico('Faxina na cara', 200))
+        empresa.addServicos(new Servico('Pintura de cabelo', 80))
+        empresa.addServicos(new Servico('Piercing', 90))
+        empresa.addServicos(new Servico('Relaxamento', 40))
+        empresa.addServicos(new Servico('Progressiva', 70))
+
+        const rg = new RG("11111111111", new Date('12/09/2000'))
+        const telefone = new Telefone("12", "9888888888")
+        let produtos = empresa.getProdutos
+        let servicos = empresa.getServicos
+        let clientes = empresa.getClientes
+
+        for (let i = 0; i < clientes.length; i++) {
+            let cliente = clientes[i]
+            for (let j = 0; j < produtos.length - i; j++) {
+                cliente.consumirProduto(produtos[j])
+            }
+            for (let k = 0; k < servicos.length - i; k++) {
+                cliente.consumirServico(servicos[k])
+            }
+            cliente.rgs.push(rg)
+            cliente.telefones.push(telefone)
+        }
 
         this.state = {
-            tela: 'Consumo',
+            tela: 'Clientes',
             empresa: empresa,
-            selectedCliente: null
+            selectedCliente: undefined,
+            selectedProduto: undefined,
+            selectedServico: undefined
         }
         this.selecionarView = this.selecionarView.bind(this)
         this.atualizarEmpresa = this.atualizarEmpresa.bind(this)
@@ -66,31 +103,62 @@ export default class Roteador extends Component<{}, state> {
 
     selecionarView(novaTela: string, evento: React.MouseEvent) {
         evento.preventDefault()
-        console.log(novaTela)
         this.setState({
             tela: novaTela
+        })
+        this.resetState()
+    }
+    resetState = () => {
+        this.setState({
+            selectedCliente: undefined,
+            selectedProduto: undefined,
+            selectedServico: undefined
         })
     }
     atualizarEmpresa(empresa: Empresa) {
         this.setState({ empresa })
     }
     handleClienteSelect = (cliente: Cliente) => {
-        this.setState({ selectedCliente: cliente })
+        this.setState({
+            selectedCliente: cliente,
+            tela: 'DadosCliente'
+        })
     }
-    
+    handleProdutoSelect = (produto: Produto) => {
+        this.setState({
+            selectedProduto: produto,
+            tela: 'DadosProduto'
+        })
+    }
+    handleServicoSelect = (servico: Servico) => {
+        this.setState({
+            selectedServico: servico,
+            tela: 'DadosServiço'
+        })
+    }
+
     render() {
-        let barraNavegacao = <BarraNavegacao seletorView={this.selecionarView} tema="purple lighten-4" botoes={['Clientes', 'Produtos', 'Serviços']} />
+        const tema = "purple lighten-4"
+        let barraNavegacao = <BarraNavegacao seletorView={this.selecionarView} tema={tema} botoes={['Clientes', 'Produtos', 'Serviços']} />
         let botaoCliente = <BotaoCliente selecionarView={this.selecionarView} />
         let botaoProduto = <BotaoProduto selecionarView={this.selecionarView} />
         let botaoServico = <BotaoServico selecionarView={this.selecionarView} />
-        const { empresa } = this.state
+        const { empresa, selectedCliente, selectedProduto, selectedServico } = this.state
 
         if (this.state.tela === 'Clientes') {
             return (
                 <>
                     {barraNavegacao}
                     {botaoCliente}
-                    <ListagemClientes tema="purple lighten-4" clientes={empresa.getClientes} selecionarView={this.selecionarView} onClienteSelect={this.handleClienteSelect} />
+                    <ListagemClientes tema={tema} clientes={empresa.getClientes} onClienteSelect={this.handleClienteSelect} empresa={empresa} selectedCliente={selectedCliente} />
+                </>
+            )
+        } else if (this.state.tela === 'DadosCliente' && selectedCliente) {
+            return (
+                <>
+                    {barraNavegacao}
+                    {botaoCliente}
+                    <DadosCliente cliente={selectedCliente} />
                 </>
             )
         } else if (this.state.tela === 'DeleteCliente') {
@@ -98,7 +166,7 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoCliente}
-                    <DeleteCliente tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <DeleteCliente tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         } else if (this.state.tela === 'CadastroCliente') {
@@ -106,7 +174,7 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoCliente}
-                    <CadastroCliente tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <CadastroCliente tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         } else if (this.state.tela === 'AtualizaCliente') {
@@ -114,7 +182,7 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {botaoCliente}
                     {barraNavegacao}
-                    <AtualizacaoCliente tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <AtualizacaoCliente tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         } else if (this.state.tela === 'Produtos') {
@@ -122,7 +190,15 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoProduto}
-                    <ListagemProdutos tema="purple lighten-4" produtos={empresa.getProdutos} selecionarView={this.selecionarView} />
+                    <ListagemProdutos tema={tema} produtos={empresa.getProdutos} empresa={empresa} selecionarView={this.selecionarView} onProdutoSelect={this.handleProdutoSelect} selectedProduto={selectedProduto} />
+                </>
+            )
+        } else if (this.state.tela === 'DadosProduto' && selectedProduto) {
+            return (
+                <>
+                    {barraNavegacao}
+                    {botaoProduto}
+                    <DadosItem item={selectedProduto} empresa={empresa} tipo={'produto'} />
                 </>
             )
         } else if (this.state.tela === 'CadastroProduto') {
@@ -130,7 +206,7 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoProduto}
-                    <CadastroProduto tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <CadastroProduto tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         } else if (this.state.tela === 'DeleteProduto') {
@@ -138,7 +214,7 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoProduto}
-                    <DeleteProduto tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <DeleteProduto tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         } else if (this.state.tela === 'AtualizacaoProduto') {
@@ -146,7 +222,7 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoProduto}
-                    <AtualizacaoProduto tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <AtualizacaoProduto tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         } else if (this.state.tela === 'Serviços') {
@@ -154,7 +230,15 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoServico}
-                    <ListagemServicos tema="purple lighten-4" servicos={empresa.getServicos} selecionarView={this.selecionarView} />
+                    <ListagemServicos tema={tema} servicos={empresa.getServicos} empresa={empresa} selecionarView={this.selecionarView} onServicoSelect={this.handleServicoSelect} selectedServico={selectedServico} />
+                </>
+            )
+        } else if (this.state.tela === 'DadosServiço' && selectedServico) {
+            return (
+                <>
+                    {barraNavegacao}
+                    {botaoServico}
+                    <DadosItem item={selectedServico} tipo={"servico"} empresa={empresa} />
                 </>
             )
         } else if (this.state.tela === 'CadastroServiço') {
@@ -162,7 +246,7 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoServico}
-                    <CadastroServico tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <CadastroServico tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         } else if (this.state.tela === 'DeleteServiço') {
@@ -170,7 +254,7 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoServico}
-                    <DeleteServico tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <DeleteServico tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         } else if (this.state.tela === 'AtualizacaoServiço') {
@@ -178,15 +262,15 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoServico}
-                    <AtualizacaoServico tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <AtualizacaoServico tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         } else if (this.state.tela === 'Consumo') {
             return (
                 <>
                     {barraNavegacao}
-                    {botaoServico}
-                    <ConsumoComponent tema="purple lighten-4" clientes={empresa.getClientes} produtos={empresa.getProdutos} empresa={empresa} servicos={empresa.getServicos}/>
+                    {botaoCliente}
+                    <ConsumoComponent tema={tema} clientes={empresa.getClientes} produtos={empresa.getProdutos} empresa={empresa} servicos={empresa.getServicos} />
                 </>
             )
         } else {
@@ -194,7 +278,7 @@ export default class Roteador extends Component<{}, state> {
                 <>
                     {barraNavegacao}
                     {botaoCliente}
-                    <CadastroCliente tema="purple lighten-4" onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
+                    <CadastroCliente tema={tema} onSubmit={(empresa) => this.atualizarEmpresa(empresa)} empresa={empresa} selecionarView={this.selecionarView} />
                 </>
             )
         }

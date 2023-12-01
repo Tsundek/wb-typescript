@@ -2,30 +2,32 @@
 import { Component } from "react";
 import 'materialize-css/dist/css/materialize.min.css'
 import Servico from "../modelos/servico";
-
-
-type state = {
-    selectedServico: Servico | null
-}
+import Empresa from "../modelos/empresa";
+import ListaServicos from "./listaServicos";
+import ListaTopMenosConsumidos from "./listaTopMenosConsumidos";
+import ListaTopMaisConsumidos from "./listaTopMaisConsumidos";
 
 type props = {
     tema: string,
     servicos: Array<Servico>
     selecionarView: (novaTela: string, evento: React.MouseEvent) => void
+    empresa: Empresa
+    onServicoSelect: (servico: Servico) => void
+    selectedServico: Servico | undefined
 }
 
-export default class ListagemServicos extends Component<props, state> {
-    constructor(props: props) {
-        super(props)
-        this.state = {
-            selectedServico: null
-        }
-    }
+export default class ListagemServicos extends Component<props> {
     componentDidMount() {
         M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'))
+        M.Tabs.init(document.querySelectorAll('.tabs'), { swipeable: false })
+        window.addEventListener('resize', this.handleResize)
+    }
+    handleResize = () => {
+        this.forceUpdate();
     }
     render() {
-        let estilo = `collection-item active ${this.props.tema}`
+        let divStyle: React.CSSProperties = { maxHeight: 1080, overflowY: "auto" }
+        const { empresa, onServicoSelect, tema, servicos, selectedServico } = this.props
         return (
             <div className="row container">
                 <div className="col s12">
@@ -35,22 +37,21 @@ export default class ListagemServicos extends Component<props, state> {
                                 <h4>Lista de Serviços</h4>
                             </div>
                         </li>
-                        <ul className="tabs">
-                            <li className="tab col s3"><a href="#test1">Test 1</a></li>
-                            <li className="tab col s3"><a className="active" href="#test2">Test 2</a></li>
-                            <li className="tab col s3 disabled"><a href="#test3">Disabled Tab</a></li>
-                            <li className="tab col s3"><a href="#test4">Test 4</a></li>
+                        <ul className="tabs tabs-fixed-width tab-demo">
+                            <li className="tab"><a href="#ListaServicos">Geral</a></li>
+                            <li className="tab"><a href="#ListaMenosServicosConsumidos">Menos Serviços Consumidos</a></li>
+                            <li className="tab"><a href="#ListaMaisServicosConsumidos">Mais Serviços Consumidos</a></li>
                         </ul>
-                        <div style={{maxHeight: "587px", overflowY: "auto"}}>
-                            {this.props.servicos.map((servico, index) => (
-                                <a href="#!" className={`collection-item avatar black-text ${servico === this.state.selectedServico ? estilo : ''}`} key={index} onClick={() => this.setState({ selectedServico: servico })}>
-                                    <i className="material-icons medium circle">shopping_cart</i>
-                                    <span className="title">{servico.nome}</span>
-                                    <p>
-                                        Valor: R$ {servico.valor}
-                                    </p>
-                                </a>
-                            ))}
+                        <div className="tabs-content">
+                            <div id="ListaServicos">
+                                <ListaServicos tema={tema} servicos={servicos} onServicoSelect={onServicoSelect} selectedServico={selectedServico}/>
+                            </div>
+                            <div id="ListaMenosServicosConsumidos" style={divStyle}>
+                                <ListaTopMenosConsumidos tema={tema} empresa={empresa} onItemSelect={onServicoSelect} tipo={'servico'} />
+                            </div>
+                            <div id="ListaMaisServicosConsumidos" style={divStyle}>
+                                <ListaTopMaisConsumidos tema={tema} empresa={empresa} onItemSelect={onServicoSelect} tipo={'servico'} />
+                            </div>
                         </div>
                     </ul>
                 </div>

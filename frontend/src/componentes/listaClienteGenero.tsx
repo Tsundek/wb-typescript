@@ -10,6 +10,7 @@ type state = {
 type props = {
     tema: string,
     clientes: Array<Cliente>
+    onClienteSelect: (cliente: Cliente) => void
 }
 function formatCPF(cpf: string) {
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
@@ -31,11 +32,11 @@ export default class ListaClientesGenero extends Component<props, state> {
         let clientesFemininos = this.props.clientes.filter(cliente => cliente.genero === 'Feminino')
         return (
             <>
-                <h5 className="center-align" style={{ display: 'flex'}}>Clientes Masculinos</h5>
-                <div className='truncate' style={{ maxHeight: 275, overflowY: "auto" }}>
+                <h5 className="center-align">Clientes Masculinos</h5>
+                <div className='truncate' style={{ maxHeight: 480, overflowY: "auto" }}>
                     {
                         clientesMasculinos.map((cliente, index) => (
-                            <a className={`collection-item avatar black-text ${cliente === this.state.selectedCliente ? estilo : ''}`} key={index} onClick={() => this.setState({ selectedCliente: cliente })}>
+                            <a className={`collection-item avatar black-text ${cliente === this.state.selectedCliente ? estilo : ''}`} key={index} onClick={() => this.props.onClienteSelect(cliente)}>
                                 <i className="material-icons medium circle">account_circle</i>
                                 <span className="title tooltipped" data-position="top" data-tooltip={cliente.nomeSocial ? cliente.nomeSocial : cliente.nome}>{cliente.nomeSocial ? `Nome Social: ${cliente.nomeSocial}` : `Nome: ${cliente.nome}`}</span>
                                 <p>
@@ -47,8 +48,9 @@ export default class ListaClientesGenero extends Component<props, state> {
                         ))
                     }
                 </div>
-                <h5 className="center-align" style={{ display: 'flex'}}>Clientes Femininos</h5>
-                <div className='truncate' style={{ maxHeight: 275, overflowY: "auto" }}>
+                <li className="divider"/>
+                <h5 className="center-align">Clientes Femininos</h5>
+                <div className='truncate' style={{ maxHeight: 480, overflowY: "auto" }}>
                     {
                         clientesFemininos.map((cliente, index) => (
                             <a className={`collection-item avatar black-text ${cliente === this.state.selectedCliente ? estilo : ''}`} key={index} onClick={() => this.setState({ selectedCliente: cliente })}>
