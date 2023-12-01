@@ -136,6 +136,7 @@ export default class CadastroCliente extends React.Component<props> {
             telefone: '',
             empresa: this.state.empresa
         })
+        M.toast({ html: 'Cliente cadastrado com sucesso!', classes: 'rounded' })
     }
 
     render() {

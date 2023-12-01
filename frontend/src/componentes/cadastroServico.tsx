@@ -52,6 +52,7 @@ export default class CadastroServico extends React.Component<props> {
             servico: new Servico('', 0),
             empresa: this.state.empresa
         })
+        M.toast({ html: 'Serviço cadastrado com sucesso!', classes: 'rounded' })
     }
 
     render() {

@@ -99,10 +99,12 @@ export default class Cliente {
     }
 
     public consumirProduto(produto: Produto) {
+        produto.quantidade += 1
         this._produtosConsumidos.push(produto)
     }
 
     public consumirServico(servico: Servico) {
+        servico.quantidade += 1
         this._servicosConsumidos.push(servico)
     }
 

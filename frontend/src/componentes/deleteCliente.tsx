@@ -13,17 +13,16 @@ type props = {
 export default class DeleteCliente extends React.Component<props> {
     componentDidMount() {
         M.Tooltip.init(document.querySelectorAll('.tooltipped'), { enterDelay: 250 })
+        M.updateTextFields()
+        M.Modal.init(document.querySelectorAll('.modal'))
     }
     state = {
         empresa: this.props.empresa,
         indice: -1
     }
 
-    handleOpenModal = (index: number) => {
+    handleCatchIndex = (index: number) => {
         this.setState({ indice: index })
-        var elems = document.querySelectorAll('.modal')
-        var instances = M.Modal.init(elems)
-        instances[0].open()
     }
     handleConfirm = () => {
         if (this.state.indice !== -1) {
@@ -34,6 +33,7 @@ export default class DeleteCliente extends React.Component<props> {
             indice: -1,
             empresa: this.state.empresa
         })
+        M.toast({ html: 'Cliente deletado com sucesso!', classes: 'rounded' })
     }
 
     render() {
@@ -42,7 +42,7 @@ export default class DeleteCliente extends React.Component<props> {
                 <div className='row'>
                     <div className='col s12'>
                         <h4>Deletar Clientes</h4>
-                        <div style={{ maxHeight: 620, overflowY: 'auto' }}>
+                        <div style={{ maxHeight: 1080, overflowY: 'auto' }}>
                             <table className='highlight col s12'>
                                 <thead>
                                     <tr>
@@ -54,12 +54,12 @@ export default class DeleteCliente extends React.Component<props> {
                                 </thead>
                                 <tbody>
                                     {this.props.empresa.getClientes.map((cliente, index) => (
-                                        <tr className='' onClick={() => this.handleOpenModal(index)}>
+                                        <tr key={index}>
                                             <td>{index}</td>
                                             <td className="truncate tooltipped" data-position="top" data-tooltip={cliente.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{cliente.nomeSocial ? `${cliente.nomeSocial}` : `${cliente.nome}`}</td>
                                             <td>{cliente.genero}</td>
                                             <td>{cliente.cpf.getValor}</td>
-                                            <td><button className="btn-floating red btn-small"><i className="material-icons">delete</i></button></td>
+                                            <td><a href='#modal1' className="modal-trigger btn-floating red btn-small" onClick={() => this.handleCatchIndex(index)}><i className="material-icons">delete</i></a></td>
                                         </tr>
                                     ))}
                                 </tbody>

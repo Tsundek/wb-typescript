@@ -20,6 +20,7 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
         M.FormSelect.init(document.querySelectorAll('select'))
         M.CharacterCounter.init(document.querySelectorAll('input'))
         M.updateTextFields()
+        M.Modal.init(document.querySelectorAll('.modal'))
     }
     constructor(props: props | Readonly<props>) {
         super(props)
@@ -30,16 +31,12 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
         }
     }
 
-    handleOpenModal = (index: number) => {
+    handleCatchIndex = (index: number) => {
         const cliente = this.props.empresa.getClientes[index]
         this.setState({
             indice: index,
             clienteSelecionado: cliente
         })
-        var elems = document.querySelectorAll('.modal')
-        var instances = M.Modal.init(elems)
-        M.updateTextFields()
-        instances[0].open()
     }
 
     handleChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>, index?: number) => {
@@ -92,6 +89,7 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
             indice: -1,
             clienteSelecionado: new Cliente('', '', '', new CPF('', new Date()))
         })
+        M.toast({ html: 'Cliente atualizado com sucesso!', classes: 'rounded' })
     }
 
     render() {
@@ -100,7 +98,7 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
                 <div className='row'>
                     <div className='col s12'>
                         <h4>Atualizar Clientes</h4>
-                        <div style={{ maxHeight: 620, overflowY: 'auto' }}>
+                        <div style={{ maxHeight: 1080, overflowY: 'auto' }}>
                             <table className='highlight col s12'>
                                 <thead>
                                     <tr>
@@ -112,12 +110,12 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
                                 </thead>
                                 <tbody>
                                     {this.props.empresa.getClientes.map((cliente, index) => (
-                                        <tr className='' onClick={() => this.handleOpenModal(index)}>
+                                        <tr key={index}>
                                             <td>{index}</td>
                                             <td className="truncate tooltipped" data-position="top" data-tooltip={cliente.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{cliente.nomeSocial ? `${cliente.nomeSocial}` : `${cliente.nome}`}</td>
                                             <td>{cliente.genero}</td>
                                             <td>{cliente.cpf.getValor}</td>
-                                            <td><button className="btn-floating yellow darken-3 btn-small"><i className="material-icons">edit</i></button></td>
+                                            <td><a href="#modal1" className="modal-trigger btn-floating yellow darken-3 btn-small" onClick={() => this.handleCatchIndex(index)}><i className="material-icons">edit</i></a></td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -140,7 +138,7 @@ export default class AtualizacaoCliente extends React.Component<props | Readonly
                                 </div>
                                 <div className="input-field col s12">
                                     <select id="genero" value={this.state.clienteSelecionado.genero} onChange={this.handleChange}>
-                                        <option value="" disabled selected>Escolha o gênero</option>
+                                        <option value="" disabled>Escolha o gênero</option>
                                         <option value="Masculino">Masculino</option>
                                         <option value="Feminino">Feminino</option>
                                     </select>

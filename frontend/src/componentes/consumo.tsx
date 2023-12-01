@@ -32,9 +32,10 @@ export default class ConsumoComponent extends Component<props, state>{
     }
 
     handleClienteSelect = (cliente: Cliente) => {
+        console.log(cliente)
         this.setState({ selectedCliente: cliente })
-        var elems = document.querySelectorAll('.modal');
-        var instances = M.Modal.init(elems);
+        var elems = document.querySelectorAll('.modal')
+        var instances = M.Modal.init(elems)
         instances[0].open();
     }
 
@@ -59,31 +60,29 @@ export default class ConsumoComponent extends Component<props, state>{
         const { empresa } = this.props
         if (selectedCliente && (selectedProduto || selectedServico)) {
             empresa.registrarConsumo(selectedCliente, selectedProduto, selectedServico)
-            alert('O consumo foi realizado com sucesso!')
-            this.setState({
-                selectedCliente: undefined,
-                selectedProduto: undefined,
-                selectedServico: undefined
-            })
+            M.toast({ html: 'O consumo foi realizado com sucesso!', classes: 'rounded' })
+            this.resetState()
         } else {
-            alert("Por favor, selecione um cliente e um produto/serviço.")
-            this.setState({
-                selectedCliente: undefined
-            })
+            M.toast({ html: 'Por favor, selecione um cliente e um produto/serviço.', classes: 'rounded' })
+            this.resetState()
         }
     }
 
     render() {
         const { clientes, produtos, servicos, tema } = this.props
+        const { selectedProduto, selectedCliente, selectedServico } = this.state
         return (
             <div className="row container">
+                <h3 className='center-align'>Consumir produtos ou serviços</h3>
                 <ul className="collection with-header" style={{ overflow: "hidden" }}>
                     <li className="collection-header">
                         <div className="row valign-wrapper">
                             <h4>Lista de Clientes</h4>
                         </div>
                     </li>
-                    <ListaClientes clientes={clientes} onClienteSelect={this.handleClienteSelect} tema={tema} />
+                    <div style={{ maxHeight: 1080, overflowY: "auto" }}>
+                        <ListaClientes clientes={clientes} onClienteSelect={this.handleClienteSelect} tema={tema} selectedCliente={selectedCliente} />
+                    </div>
                 </ul>
                 <div id="choiceModal" className="modal">
                     <div className="modal-content">
@@ -92,39 +91,35 @@ export default class ConsumoComponent extends Component<props, state>{
                     </div>
                     <div className="modal-footer">
                         <a href="#modal1" className="modal-close waves-effect waves-green btn-flat modal-trigger">Produto</a>
-                        <a href="#modal2" className="modal-close waves-effect waves-green btn-flat modal-trigger">Serviço</a>
-                        <button className="modal-close waves-effect waves-red btn-flat">Fechar</button>
+                        <a href="#modal2" className="modal-close waves-effect waves-teal btn-flat modal-trigger">Serviço</a>
+                        <button onClick={this.resetState} className="modal-close waves-effect waves-red btn-flat">Fechar</button>
                     </div>
                 </div>
                 <div id="modal1" className="modal modal-fixed-footer">
-                    <div className='center-align'>
-                        <h4 className='push-s5'>Escolha um produto</h4>
-                    </div>
                     <div className="modal-content">
+                        <h4 className='center-align'>Escolha um produto</h4>
                         <ul className="collection with-header">
-                            <ListaProdutos produtos={produtos} onProdutoSelect={this.handleProdutoSelect} tema={tema} />
+                            <ListaProdutos produtos={produtos} onProdutoSelect={this.handleProdutoSelect} tema={tema} selectedProduto={selectedProduto} />
                         </ul>
                     </div>
                     <div className="modal-footer">
-                        <button onClick={this.handleConsumo} className='left modal-close waves-effect waves-red btn-flat'>Consumir</button>
-                        <a href="#choiceModal" className="modal-close waves-effect waves-green btn-flat modal-trigger">Voltar</a>
+                        <button onClick={this.handleConsumo} className='left modal-close waves-effect waves-light btn'>Consumir</button>
+                        <a href="#choiceModal" className="modal-close waves-effect waves-light btn-flat modal-trigger">Voltar</a>
                         <button onClick={this.resetState} className="modal-close waves-effect waves-red btn-flat">Fechar</button>
                     </div>
                 </div>
                 <div id="modal2" className="modal modal-fixed-footer">
-                    <div className='center-align'>
-                        <h4 className='push-s5'>Escolha um serviço</h4>
-                    </div>
                     <div className="modal-content">
+                        <h4 className='center-align'>Escolha um serviço</h4>
                         <ul className="collection with-header">
                             <div className="tabs-content">
-                                <ListaServicos servicos={servicos} onServicoSelect={this.handleServicoSelect} tema={tema} />
+                                <ListaServicos servicos={servicos} onServicoSelect={this.handleServicoSelect} tema={tema} selectedServico={selectedServico} />
                             </div>
                         </ul>
                     </div>
                     <div className="modal-footer">
-                        <button onClick={this.handleConsumo} className='left modal-close waves-effect waves-red btn-flat'>Consumir</button>
-                        <a href="#choiceModal" className="modal-close waves-effect waves-green btn-flat modal-trigger">Voltar</a>
+                        <button onClick={this.handleConsumo} className='left modal-close waves-effect waves-light btn'>Consumir</button>
+                        <a href="#choiceModal" className="modal-close waves-effect waves-light btn-flat modal-trigger">Voltar</a>
                         <button onClick={this.resetState} className="modal-close waves-effect waves-red btn-flat">Fechar</button>
                     </div>
                 </div>

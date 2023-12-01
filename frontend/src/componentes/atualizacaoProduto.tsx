@@ -16,6 +16,8 @@ export default class AtualizacaoProduto extends React.Component<props | Readonly
         M.Tooltip.init(document.querySelectorAll('.tooltipped'), { enterDelay: 250 })
         M.FormSelect.init(document.querySelectorAll('select'))
         M.CharacterCounter.init(document.querySelectorAll('input'))
+        M.updateTextFields()
+        M.Modal.init(document.querySelectorAll('.modal'))
     }
     constructor(props: props | Readonly<props>) {
         super(props)
@@ -26,16 +28,12 @@ export default class AtualizacaoProduto extends React.Component<props | Readonly
         }
     }
 
-    handleOpenModal = (index: number) => {
+    handleCatchIndex = (index: number) => {
         const produto = this.props.empresa.getProdutos[index]
         this.setState({
             indice: index,
             produtoSelecionado: produto
         })
-        var elems = document.querySelectorAll('.modal')
-        var instances = M.Modal.init(elems)
-        M.updateTextFields()
-        instances[0].open()
     }
 
     handleChange = (event: React.ChangeEvent<HTMLInputElement>, index?: number) => {
@@ -66,6 +64,7 @@ export default class AtualizacaoProduto extends React.Component<props | Readonly
             indice: -1,
             produtoSelecionado: new Produto('', 0)
         })
+        M.toast({ html: 'Produto atualizado com sucesso!', classes: 'rounded' })
     }
 
     render() {
@@ -74,7 +73,7 @@ export default class AtualizacaoProduto extends React.Component<props | Readonly
                 <div className='row'>
                     <div className='col s12'>
                         <h4>Atualizar Produtos</h4>
-                        <div style={{ maxHeight: 620, overflowY: 'auto' }}>
+                        <div style={{ maxHeight: 1080, overflowY: 'auto' }}>
                             <table className='highlight col s12'>
                                 <thead>
                                     <tr>
@@ -85,11 +84,11 @@ export default class AtualizacaoProduto extends React.Component<props | Readonly
                                 </thead>
                                 <tbody>
                                     {this.props.empresa.getProdutos.map((produto, index) => (
-                                        <tr className='' onClick={() => this.handleOpenModal(index)}>
+                                        <tr key={index}>
                                             <td>{index}</td>
                                             <td className="truncate tooltipped" data-position="top" data-tooltip={produto.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{produto.nome}</td>
                                             <td>R$ {produto.valor}</td>
-                                            <td><button className="btn-floating yellow darken-3 btn-small"><i className="material-icons">edit</i></button></td>
+                                            <td><a href='#modal1' className="modal-trigger btn-floating yellow darken-3 btn-small" onClick={() => this.handleCatchIndex(index)}><i className="material-icons">edit</i></a></td>
                                         </tr>
                                     ))}
                                 </tbody>

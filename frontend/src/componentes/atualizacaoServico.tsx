@@ -16,6 +16,8 @@ export default class AtualizacaoServico extends React.Component<props | Readonly
         M.Tooltip.init(document.querySelectorAll('.tooltipped'), { enterDelay: 250 })
         M.FormSelect.init(document.querySelectorAll('select'))
         M.CharacterCounter.init(document.querySelectorAll('input'))
+        M.updateTextFields()
+        M.Modal.init(document.querySelectorAll('.modal'))
     }
     constructor(props: props | Readonly<props>) {
         super(props)
@@ -26,16 +28,12 @@ export default class AtualizacaoServico extends React.Component<props | Readonly
         }
     }
 
-    handleOpenModal = (index: number) => {
+    handleCatchIndex = (index: number) => {
         const servico = this.props.empresa.getServicos[index]
         this.setState({
             indice: index,
             servicoSelecionado: servico
         })
-        var elems = document.querySelectorAll('.modal')
-        var instances = M.Modal.init(elems)
-        M.updateTextFields()
-        instances[0].open()
     }
 
     handleChange = (event: React.ChangeEvent<HTMLInputElement>, index?: number) => {
@@ -66,6 +64,7 @@ export default class AtualizacaoServico extends React.Component<props | Readonly
             indice: -1,
             servicoSelecionado: new Servico('', 0)
         })
+        M.toast({ html: 'Serviço atualizado com sucesso!', classes: 'rounded' })
     }
 
     render() {
@@ -85,11 +84,11 @@ export default class AtualizacaoServico extends React.Component<props | Readonly
                                 </thead>
                                 <tbody>
                                     {this.props.empresa.getServicos.map((servico, index) => (
-                                        <tr className='' onClick={() => this.handleOpenModal(index)}>
+                                        <tr key={index}>
                                             <td>{index}</td>
                                             <td className="truncate tooltipped" data-position="top" data-tooltip={servico.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{servico.nome}</td>
                                             <td>R$ {servico.valor}</td>
-                                            <td><button className="btn-floating yellow darken-3 btn-small"><i className="material-icons">edit</i></button></td>
+                                            <td><a href='#modal1' className="modal-trigger btn-floating yellow darken-3 btn-small" onClick={() => this.handleCatchIndex(index)}><i className="material-icons">edit</i></a></td>
                                         </tr>
                                     ))}
                                 </tbody>

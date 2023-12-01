@@ -51,6 +51,7 @@ export default class CadastroProduto extends React.Component<props> {
             produto: new Produto('', 0),
             empresa: this.state.empresa
         })
+        M.toast({ html: 'Produto cadastrado com sucesso!', classes: 'rounded' })
     }
 
     render() {
