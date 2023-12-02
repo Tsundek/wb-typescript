@@ -1,33 +1,35 @@
 import React, { useEffect, useState } from 'react'
 import 'materialize-css/dist/css/materialize.min.css'
 import M from 'materialize-css'
-import Empresa from '../modelos/empresa'
+import { deleteClienteData } from '../servicos/clientes'
+import { ClienteInterface } from '../interfaces/cliente'
 
 type props = {
-    onSubmit: (empresa: Empresa) => void
-    empresa: Empresa
-    selecionarView: (novaTela: string, evento: React.MouseEvent) => void
+    clientes: Array<ClienteInterface>
+    setClientes: React.Dispatch<React.SetStateAction<ClienteInterface[]>>
 }
 
-export const DeleteCliente = ({ onSubmit, empresa, selecionarView }: props) => {
+export const DeleteCliente = ({ clientes, setClientes }: props) => {
+    const [selectedCliente, setSelectedCliente] = useState<ClienteInterface | null>(null)
+
     useEffect(() => {
         M.Tooltip.init(document.querySelectorAll('.tooltipped'), { enterDelay: 250 });
         M.updateTextFields();
         M.Modal.init(document.querySelectorAll('.modal'));
     }, [])
 
-    const [indice, setIndice] = useState<number>(-1);
-
-    const handleCatchIndex = (index: number) => {
-        setIndice(index)
-    }
-    const handleConfirm = () => {
-        if (indice !== -1) {
-            empresa.deletarClientes(indice)
-            onSubmit(empresa)
+    const handleConfirm = async () => {
+        if (selectedCliente) {
+            try {
+                deleteClienteData(selectedCliente)
+                setClientes((prevClientes) =>
+                    prevClientes.filter((cliente) => cliente.id !== selectedCliente.id)
+                )
+            } catch (error) {
+                M.toast({ html: 'Erro inesperado ao deletar cliente', classes: 'rounded red' });
+            }
         }
-        setIndice(-1)
-        M.toast({ html: 'Cliente deletado com sucesso!', classes: 'rounded' })
+        setSelectedCliente(null)
     }
 
     return (
@@ -41,18 +43,16 @@ export const DeleteCliente = ({ onSubmit, empresa, selecionarView }: props) => {
                                 <tr>
                                     <th>#</th>
                                     <th>Nome</th>
-                                    <th>Gênero</th>
-                                    <th>CPF</th>
+                                    <th>Sobrenome</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {empresa.getClientes.map((cliente, index) => (
+                                {clientes.map((cliente, index) => (
                                     <tr key={index}>
-                                        <td>{index}</td>
-                                        <td className="truncate tooltipped" data-position="top" data-tooltip={cliente.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{cliente.nomeSocial ? `${cliente.nomeSocial}` : `${cliente.nome}`}</td>
-                                        <td>{cliente.genero}</td>
-                                        <td>{cliente.cpf.getValor}</td>
-                                        <td><a href='#modal1' className="modal-trigger btn-floating red btn-small" onClick={() => handleCatchIndex(index)}><i className="material-icons">delete</i></a></td>
+                                        <td>{cliente.id}</td>
+                                        <td className="truncate tooltipped" data-position="top" data-tooltip={cliente.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{cliente.nome}</td>
+                                        <td>{cliente.sobreNome}</td>
+                                        <td><a href='#modal1' className="modal-trigger btn-floating red btn-small" onClick={() => setSelectedCliente(cliente)}><i className="material-icons">delete</i></a></td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -63,8 +63,8 @@ export const DeleteCliente = ({ onSubmit, empresa, selecionarView }: props) => {
             <div id="modal1" className="modal">
                 <div className="modal-content">
                     <h4>Confirmação</h4>
-                    <p className="truncate tooltipped" data-position="top" data-tooltip={indice >= 0 && empresa.getClientes[indice] && (empresa.getClientes[indice].nomeSocial || empresa.getClientes[indice].nome)} style={{ display: "block" }}>
-                        Você tem certeza de que deseja deletar o cliente número {indice} - {indice >= 0 && empresa.getClientes[indice] && (empresa.getClientes[indice].nomeSocial || empresa.getClientes[indice].nome)}?
+                    <p className="truncate tooltipped" data-position="top" data-tooltip={selectedCliente?.nome} style={{ display: "block" }}>
+                        Você tem certeza de que deseja deletar o cliente número {selectedCliente?.id} - {selectedCliente?.nome}?
                     </p>
                 </div>
                 <div className="modal-footer">

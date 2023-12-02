@@ -57,7 +57,7 @@ export const ConsumoComponent = ({ clientes, produtos, servicos, empresa }: prop
                     </div>
                 </li>
                 <div style={{ maxHeight: 1080, overflowY: "auto" }}>
-                    <ListaClientes clientes={clientes} onClienteSelect={handleClienteSelect} />
+                    {/* <ListaClientes clientes={clientes} onClienteSelect={handleClienteSelect} /> */}
                 </div>
             </ul>
             <div id="choiceModal" className="modal">

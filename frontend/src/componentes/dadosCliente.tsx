@@ -1,53 +1,52 @@
-import { useEffect } from "react"
-import Cliente from "../modelos/cliente"
+import { useEffect, useState } from "react"
+import { fetchClienteByID } from "../servicos/clientes"
+import { ClienteInterface } from "../interfaces/cliente"
 
 type props = {
-    cliente: Cliente
+    clienteID: number
 }
 
-function formatData(data: Date) {
-    let dia = data.getDate() < 10 ? '0' + data.getDate().toString() : data.getDate();
-    let mes = (data.getMonth() + 1) < 10 ? '0' + ((data.getMonth()) + 1).toString() : ((data.getMonth()) + 1).toString()
-    let ano = data.getFullYear()
-    return `${dia}/${mes}/${ano}`
-}
+export const DadosCliente = ({ clienteID }: props) => {
 
-export const DadosCliente = ({ cliente }: props) => {
+    const [cliente, setCliente] = useState<ClienteInterface>()
+
+
     useEffect(() => {
-        M.Chips.init(document.querySelectorAll('.chips'));
-    }, [])
+        M.Chips.init(document.querySelectorAll('.chips'))
+        M.Tooltip.init(document.querySelectorAll('.tooltipped'), { enterDelay: 250 })
+        const fetchData = async () => {
+            const data = await fetchClienteByID(clienteID)
+            setCliente(data)
+        }
+        fetchData()
+
+    }, [clienteID])
 
     return (
         <div className="container">
             <h3 className="center">Dados do Cliente</h3>
             <div className="divider" />
-            <h5>Data de Cadastro: {formatData(cliente.dataCadastro)}</h5>
             <br />
-            <h5 className="truncate">Nome: {cliente.nome}</h5>
+            <h5 className="truncate tooltipped" data-position="top" data-tooltip={cliente?.nome}>Nome: {cliente?.nome}</h5>
             <br />
-            <h5 className="truncate">Nome Social: {cliente.nomeSocial}</h5>
+            <h5 className="truncate tooltipped" data-position="top" data-tooltip={cliente?.sobreNome}>Sobrenome: {cliente?.sobreNome}</h5>
             <br />
-            <h5>Gênero: {cliente.genero}</h5>
+            <h5>Email: {cliente?.email}</h5>
             <br />
-            <h5>CPF: {cliente.cpf.getValor}</h5>
-            <h5>Data de emissão: {formatData(cliente.cpf.getDataEmissao)}</h5>
-            <br />
-            <h5>RGs:</h5>
-            {cliente.rgs.map((rg, index) => (
-                <div className="chip blue lighten-3" key={index}>
-                    Valor: {rg.getValor}   Data de Emissão: {formatData(rg.getDataEmissao)}
-                </div>
-            ))}
+            <h5>Endereço:</h5>
+            <h6><p>
+                Estado: {cliente?.endereco.estado}, Cidade: {cliente?.endereco.cidade}
+                <br/>
+                Rua: {cliente?.endereco.rua}, Nº{cliente?.endereco.numero} - Bairro: {cliente?.endereco.bairro}, CEP: {cliente?.endereco.codigoPostal}
+            </p></h6>
             <br />
             <h5>Telefones:</h5>
-            {cliente.telefones.map((telefone, index) => (
+            {cliente?.telefones.map((telefone, index) => (
                 <div key={index} className="chip purple lighten-3">
-                    Número: ({telefone.getDdd}) {telefone.getNumero}
+                    Número: ({telefone.ddd}) {telefone.numero}
                 </div>
             ))}
             <br />
-            <h5>Quantidade de produtos consumidos: {cliente.produtosConsumidos.length}</h5>
-            <h5>Quantidade de serviços consumidos: {cliente.servicosConsumidos.length}</h5>
         </div>
     )
 }

@@ -21,7 +21,7 @@ export const BotaoCliente = ({ selecionarView }: props) => {
                 <li><button className="btn-floating green" onClick={(evento) => selecionarView('CadastroCliente', evento)}><i className="material-icons">add</i></button></li>
                 <li><button className="btn-floating red"><i className="material-icons" onClick={(evento) => selecionarView('DeleteCliente', evento)}>delete</i></button></li>
                 <li><button className="btn-floating yellow darken-1"><i className="material-icons" onClick={(evento) => selecionarView('AtualizaCliente', evento)}>edit</i></button></li>
-                <li><button className="btn-floating blue"><i className="material-icons" onClick={(evento) => selecionarView('Consumo', evento)}>add_shopping_cart</i></button></li>
+                {/* <li><button className="btn-floating blue"><i className="material-icons" onClick={(evento) => selecionarView('Consumo', evento)}>add_shopping_cart</i></button></li> */}
                 <li><button className="btn-floating blue-grey darken-1" onClick={(evento) => selecionarView('Clientes', evento)}><i className="material-icons">home</i></button></li>
             </ul>
         </div>

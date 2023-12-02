@@ -1,15 +1,13 @@
 import { useEffect } from "react"
 import {ListaClientes} from "./listaClientes"
-import {ListaClientesGenero} from "./listaClienteGenero"
-import {ListaTopMaisConsumidosValor} from "./listaMaisConsumidoValor"
 import 'materialize-css/dist/css/materialize.min.css'
 
-import Cliente from "../modelos/cliente"
 import Empresa from "../modelos/empresa"
+import { ClienteInterface } from "../interfaces/cliente"
 
 type props = {
-    clientes: Array<Cliente>
-    onClienteSelect: (cliente: Cliente) => void
+    clientes: Array<ClienteInterface>
+    onClienteSelect: (cliente: ClienteInterface) => void
     empresa: Empresa
 }
 
@@ -30,20 +28,9 @@ export const ListagemClientes = ({ clientes, onClienteSelect, empresa }: props) 
                             <h4>Lista de Clientes</h4>
                         </div>
                     </li>
-                    <ul className="tabs tabs-fixed-width tab-demo">
-                        <li className="tab"><a href="#ListaClientes">Geral</a></li>
-                        <li className="tab"><a href="#ListaClientesGenero">Gênero</a></li>
-                        <li className="tab"><a href="#ListaMaisConsumidosValor">Maior Valor Consumido</a></li>
-                    </ul>
                     <div className="tabs-content">
                         <div id="ListaClientes" style={divStyle}>
                             <ListaClientes clientes={clientes} onClienteSelect={onClienteSelect} />
-                        </div>
-                        <div id="ListaClientesGenero" style={divStyle}>
-                            <ListaClientesGenero clientes={clientes} onClienteSelect={onClienteSelect} />
-                        </div>
-                        <div id="ListaMaisConsumidosValor" style={divStyle}>
-                            <ListaTopMaisConsumidosValor empresa={empresa} onClienteSelect={onClienteSelect} />
                         </div>
                     </div>
                 </ul>
