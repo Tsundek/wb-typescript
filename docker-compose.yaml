@@ -1,0 +1,71 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    container_name: dbPostgres
+    secrets:
+      - db-password
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-q",
+          "-d",
+          "wb-backend",
+          "-U",
+          "postgres"
+        ]
+      interval: 3s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backnet
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=wb-backend
+      - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+    ports:
+      - 5432:5432
+    expose:
+      - 5432
+
+  adminer:
+    image: adminer
+    restart: always
+    container_name: adminer
+    ports:
+      - 8080:8080
+    networks:
+      - backnet
+
+  process-back:
+    build:
+      context: backend
+      target: builder
+    working_dir: /code
+    restart: always
+    container_name: backend
+    volumes:
+      - ./backend:/code
+    networks:
+      - backnet
+    ports:
+      - 8000:8000
+    expose:
+      - 8000
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks:
+  backnet:
+
+volumes:
+  db-data:
+
+secrets:
+  db-password:
+    file: ./db/password.txt
