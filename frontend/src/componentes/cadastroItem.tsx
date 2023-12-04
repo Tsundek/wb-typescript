@@ -1,46 +1,65 @@
 import React, { useEffect, useState } from 'react'
 import 'materialize-css/dist/css/materialize.min.css'
 import M from 'materialize-css'
-import Empresa from '../modelos/empresa'
-import Produto from '../modelos/produto'
-import Servico from '../modelos/servico'
+import { ProdutoInterface } from '../interfaces/produto'
+import { ServicoInterface } from '../interfaces/servico'
+import { cadastroProduto, cadastroServico, getAllProducts, getAllServices } from '../servicos/items'
 
-type Item = Produto | Servico
+type Item = ProdutoInterface | ServicoInterface
 
 type props = {
     tema: string,
-    onSubmit: (empresa: Empresa) => void
-    empresa: Empresa
     tipo: 'produto' | 'servico'
+    setItems: React.Dispatch<React.SetStateAction<ProdutoInterface[] | ServicoInterface[]>>
 }
 
-export const CadastroItem = ({ tema, onSubmit, empresa, tipo }: props) => {
-    const [item, setItem] = useState<Item>(tipo === 'produto' ? new Produto('', 0) : new Servico('', 0))
+export const CadastroItem = ({ tema, tipo, setItems }: props) => {
+    const [item, setItem] = useState<Item>()
 
     useEffect(() => {
-        M.FormSelect.init(document.querySelectorAll('select'));
-        M.CharacterCounter.init(document.querySelectorAll('input'));
+        M.FormSelect.init(document.querySelectorAll('select'))
+        M.CharacterCounter.init(document.querySelectorAll('input'))
     }, [])
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const id = event.target.id as 'nome' | 'valor'
         const value = event.target.value
-        setItem((prevItem) => ({
-            ...prevItem,
-            [id]: id === 'valor' ? parseFloat(value) : value
-        }))
+
+        setItem((prevItem) => {
+            const updatedItem: Item = !prevItem
+                ? { [id]: id === 'valor' ? parseFloat(value) : value } as unknown as Item
+                : {
+                    ...prevItem,
+                    [id]: id === 'valor' ? parseFloat(value) : value,
+                } as Item
+
+            return updatedItem
+        })
     }
-    const handleSubmit = (event: React.FormEvent) => {
+    const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault()
-        event.preventDefault();
-        if (tipo === 'produto') {
-            empresa.addProdutos(item as Produto);
-        } else {
-            empresa.addServicos(item as Servico);
+        let body = {
+            nome: item?.nome,
+            valor: item?.valor,
+            quantidade: 0,
+            cliente_id: null
         }
-        onSubmit(empresa)
-        setItem(tipo === 'produto' ? new Produto('', 0) : new Servico('', 0))
-        M.toast({ html: `${tipo === 'produto' ? 'Produto' : 'Serviço'} cadastrado com sucesso!`, classes: 'rounded green' });
+        if (tipo === 'produto') {
+            const response = await cadastroProduto(body)
+            if (response) {
+                const produtos = await getAllProducts()
+                if (produtos)
+                    setItems(produtos)
+            }
+        } else {
+            const response = await cadastroServico(body)
+            if (response) {
+                const servicos = await getAllServices()
+                if (servicos)
+                    setItems(servicos)
+            }
+        }
+        setItem(undefined)
     }
     let estiloBotao = `btn waves-effect waves-light ${tema}`
     return (
@@ -50,11 +69,11 @@ export const CadastroItem = ({ tema, onSubmit, empresa, tipo }: props) => {
                     <h4>{`Cadastro de ${tipo === 'produto' ? 'Produtos' : 'Serviços'}`}</h4>
                     <div className="row">
                         <div className="input-field col s6">
-                            <input required id="nome" type="text" className="validate" value={item.nome || ''} onChange={handleChange} />
+                            <input required id="nome" type="text" className="validate" value={item?.nome} onChange={handleChange} />
                             <label htmlFor="nome">{`Nome do ${tipo === 'produto' ? 'produto' : 'serviço'}`}<span className="red-text"> *</span></label>
                         </div>
                         <div className="input-field col s6">
-                            <input id="valor" type="number" className="validate" value={item.valor || ''} onChange={handleChange} />
+                            <input id="valor" type="number" className="validate" data-length="7" value={item?.valor} onChange={handleChange} />
                             <label htmlFor="valor">{`Valor do ${tipo === 'produto' ? 'produto' : 'serviço'}`}<span className="red-text"> *</span></label>
                         </div>
                     </div>

@@ -18,29 +18,39 @@ import { AtualizacaoCliente } from "./atualizacaoCliente"
 import { DadosCliente } from "./dadosCliente"
 import { BotaoCliente } from "./btnCliente"
 
-import Servico from "../modelos/servico"
-import Produto from "../modelos/produto"
-import Empresa from "../modelos/empresa"
-import { fetchClientesData } from "../servicos/clientes"
 import { ClienteInterface } from "../interfaces/cliente"
+import { getAllUsers } from "../servicos/clientes"
+import { ProdutoInterface } from "../interfaces/produto"
+import { ServicoInterface } from "../interfaces/servico"
+import { getAllProducts, getAllServices } from "../servicos/items"
 
 
 export const Roteador = () => {
     const [clientes, setClientes] = useState(Array<ClienteInterface>())
+    const [produtos, setProdutos] = useState(Array<ProdutoInterface>())
+    const [servicos, setServicos] = useState(Array<ServicoInterface>())
     const [tela, setTela] = useState("Clientes")
     const [selectedCliente, setSelectedCliente] = useState<ClienteInterface | undefined>(undefined)
-    const [selectedProduto, setSelectedProduto] = useState<Produto | undefined>(undefined)
-    const [selectedServico, setSelectedServico] = useState<Servico | undefined>(undefined)
+    const [selectedProduto, setSelectedProduto] = useState<ProdutoInterface | undefined>(undefined)
+    const [selectedServico, setSelectedServico] = useState<ServicoInterface | undefined>(undefined)
 
     useEffect(() => {
         const fetchData = async () => {
-            const data = await fetchClientesData()
-            setClientes(data)
+            const clientes = await getAllUsers()
+            const produtos = await getAllProducts()
+            const servicos = await getAllServices()
+            if (produtos) {
+                setProdutos(produtos)
+            }
+            if (clientes) {
+                setClientes(clientes)
+            }
+            if (servicos) {
+                setServicos(servicos)
+            }
         }
         fetchData()
     }, [])
-
-    const [empresa, setEmpresa] = useState(new Empresa())
 
     const selecionarView = (novaTela: string, evento: React.MouseEvent) => {
         evento.preventDefault()
@@ -53,24 +63,21 @@ export const Roteador = () => {
         setSelectedServico(undefined)
     }
 
-    const atualizarEmpresa = (empresa: Empresa) => {
-        setEmpresa(empresa)
-    }
     const handleClienteSelect = (cliente: ClienteInterface) => {
         setSelectedCliente(cliente)
         setTela("DadosCliente")
     }
-    const handleProdutoSelect = (produto: Produto) => {
+    const handleProdutoSelect = (produto: ProdutoInterface) => {
         setSelectedProduto(produto)
         setTela("DadosProduto")
     }
-    const handleServicoSelect = (servico: Servico) => {
+    const handleServicoSelect = (servico: ServicoInterface) => {
         setSelectedServico(servico)
         setTela("DadosServiço")
     }
 
     const tema = "purple lighten-4"
-    const barraNavegacao = (<BarraNavegacao seletorView={selecionarView} tema={tema} botoes={['Clientes']} />)
+    const barraNavegacao = (<BarraNavegacao seletorView={selecionarView} tema={tema} botoes={['Clientes', 'Produtos', 'Serviços']} />)
     const botaoCliente = <BotaoCliente selecionarView={selecionarView} />
     const botaoProduto = <BotaoProduto selecionarView={selecionarView} />
     const botaoServico = <BotaoServico selecionarView={selecionarView} />
@@ -80,7 +87,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoCliente}
-                <ListagemClientes clientes={clientes} onClienteSelect={handleClienteSelect} empresa={empresa} />
+                <ListagemClientes clientes={clientes} onClienteSelect={handleClienteSelect} />
             </>
         )
     } else if (tela === 'DadosCliente' && selectedCliente?.id) {
@@ -104,7 +111,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoCliente}
-                <CadastroCliente tema={tema} clientes={clientes} setClientes={setClientes}/>
+                <CadastroCliente tema={tema} clientes={clientes} setClientes={setClientes} />
             </>
         )
     } else if (tela === 'AtualizaCliente') {
@@ -120,7 +127,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoProduto}
-                <ListagemProdutos produtos={empresa.getProdutos} onProdutoSelect={handleProdutoSelect} empresa={empresa} />
+                <ListagemProdutos produtos={produtos} onProdutoSelect={handleProdutoSelect} />
             </>
         )
     } else if (tela === 'DadosProduto' && selectedProduto) {
@@ -128,7 +135,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoProduto}
-                <DadosItem item={selectedProduto} empresa={empresa} tipo={'produto'} />
+                <DadosItem item={selectedProduto} tipo={'produto'} />
             </>
         )
     } else if (tela === 'CadastroProduto') {
@@ -136,7 +143,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoProduto}
-                <CadastroItem tema={tema} onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} tipo={"produto"} />
+                <CadastroItem tema={tema} tipo={"produto"} setItems={setProdutos} />
             </>
         )
     } else if (tela === 'DeleteProduto') {
@@ -144,7 +151,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoProduto}
-                <DeleteItem onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} items={empresa.getProdutos} tipo={"produto"} />
+                <DeleteItem items={produtos} tipo={"produto"} setItems={setProdutos} />
             </>
         )
     } else if (tela === 'AtualizacaoProduto') {
@@ -152,7 +159,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoProduto}
-                <AtualizacaoItem onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} items={empresa.getProdutos} tipo={"produto"} />
+                <AtualizacaoItem items={produtos} tipo={"produto"} setItems={setProdutos} />
             </>
         )
     } else if (tela === 'Serviços') {
@@ -160,7 +167,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoServico}
-                <ListagemServicos servicos={empresa.getServicos} empresa={empresa} onServicoSelect={handleServicoSelect} />
+                <ListagemServicos servicos={servicos} onServicoSelect={handleServicoSelect} />
             </>
         )
     } else if (tela === 'DadosServiço' && selectedServico) {
@@ -168,7 +175,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoServico}
-                <DadosItem item={selectedServico} tipo={"servico"} empresa={empresa} />
+                <DadosItem item={selectedServico} tipo={"servico"} />
             </>
         )
     } else if (tela === 'CadastroServiço') {
@@ -176,7 +183,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoServico}
-                <CadastroItem tema={tema} onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} tipo={"servico"} />
+                <CadastroItem tema={tema} tipo={"servico"} setItems={setServicos} />
             </>
         )
     } else if (tela === 'DeleteServiço') {
@@ -184,7 +191,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoServico}
-                <DeleteItem onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} items={empresa.getServicos} tipo={"servico"} />
+                <DeleteItem items={servicos} tipo={"servico"} setItems={setServicos} />
             </>
         )
     } else if (tela === 'AtualizacaoServiço') {
@@ -192,7 +199,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoServico}
-                <AtualizacaoItem onSubmit={(empresa) => atualizarEmpresa(empresa)} empresa={empresa} items={empresa.getServicos} tipo={"servico"} />
+                <AtualizacaoItem items={servicos} tipo={"servico"} setItems={setServicos} />
             </>
         )
     } else if (tela === 'Consumo') {
@@ -200,7 +207,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoCliente}
-                <ConsumoComponent clientes={empresa.getClientes} produtos={empresa.getProdutos} empresa={empresa} servicos={empresa.getServicos} />
+                <ConsumoComponent clientes={clientes} produtos={produtos} servicos={servicos} />
             </>
         )
     } else {
@@ -208,7 +215,7 @@ export const Roteador = () => {
             <>
                 {barraNavegacao}
                 {botaoCliente}
-                <ListagemClientes clientes={clientes} onClienteSelect={handleClienteSelect} empresa={empresa} />
+                <ListagemClientes clientes={clientes} onClienteSelect={handleClienteSelect} />
             </>
         )
     }

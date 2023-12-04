@@ -1,34 +1,43 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ListaClientes } from './listaClientes'
-import Cliente from '../modelos/cliente'
-import Produto from '../modelos/produto'
-import Servico from '../modelos/servico'
-
-import Empresa from '../modelos/empresa'
 import { ListaItems } from './listaItems'
+import { ProdutoInterface } from '../interfaces/produto'
+import { ServicoInterface } from '../interfaces/servico'
+import { ClienteInterface } from '../interfaces/cliente'
+import { consumirProduto, consumirServico } from '../servicos/items'
 
 type props = {
-    clientes: Array<Cliente>
-    produtos: Array<Produto>
-    servicos: Array<Servico>
-    empresa: Empresa
+    clientes: Array<ClienteInterface>
+    produtos: Array<ProdutoInterface>
+    servicos: Array<ServicoInterface>
 }
 
-export const ConsumoComponent = ({ clientes, produtos, servicos, empresa }: props) => {
-    const [selectedCliente, setSelectedCliente] = useState<Cliente | undefined>(undefined)
-    const [selectedProduto, setSelectedProduto] = useState<Produto | undefined>(undefined)
-    const [selectedServico, setSelectedServico] = useState<Servico | undefined>(undefined)
+export const ConsumoComponent = ({ clientes, produtos, servicos }: props) => {
+    const [selectedCliente, setSelectedCliente] = useState<ClienteInterface | undefined>(undefined)
+    const [selectedProduto, setSelectedProduto] = useState<ProdutoInterface | undefined>(undefined)
+    const [selectedServico, setSelectedServico] = useState<ServicoInterface | undefined>(undefined)
 
-    const handleClienteSelect = (cliente: Cliente) => {
+    useEffect(() => {
+        M.Modal.init(document.querySelectorAll('.modal'), {
+            onCloseStart: () => {
+                setSelectedCliente(undefined)
+                setSelectedProduto(undefined)
+                setSelectedServico(undefined)
+            }
+        })
+    }, [])
+
+    const handleClienteSelect = (cliente: ClienteInterface) => {
         setSelectedCliente(cliente)
         const elems = document.querySelectorAll('.modal')
         const instances = M.Modal.init(elems)
         instances[0].open()
     }
-    const handleProdutoSelect = (produto: Produto) => {
+    const handleProdutoSelect = (produto: ProdutoInterface) => {
         setSelectedProduto(produto)
+        console.log(produto)
     }
-    const handleServicoSelect = (servico: Servico) => {
+    const handleServicoSelect = (servico: ServicoInterface) => {
         setSelectedServico(servico)
     }
     const resetState = () => {
@@ -36,11 +45,14 @@ export const ConsumoComponent = ({ clientes, produtos, servicos, empresa }: prop
         setSelectedProduto(undefined)
         setSelectedServico(undefined)
     }
-    const handleConsumo = () => {
+    const handleConsumo = async () => {
         if (selectedCliente && (selectedProduto || selectedServico)) {
-            empresa.registrarConsumo(selectedCliente, selectedProduto, selectedServico)
-            M.toast({ html: 'O consumo foi realizado com sucesso!', classes: 'rounded green' })
-            resetState()
+            if(selectedCliente.id && selectedProduto?.id){
+                await consumirProduto(selectedCliente.id, selectedProduto.id)
+            }
+            if(selectedCliente.id && selectedServico?.id){
+                await consumirServico(selectedCliente.id, selectedServico.id)
+            }
         } else {
             M.toast({ html: 'Por favor, selecione um cliente e um produto/serviço.', classes: 'rounded red' })
             resetState()
@@ -57,7 +69,7 @@ export const ConsumoComponent = ({ clientes, produtos, servicos, empresa }: prop
                     </div>
                 </li>
                 <div style={{ maxHeight: 1080, overflowY: "auto" }}>
-                    {/* <ListaClientes clientes={clientes} onClienteSelect={handleClienteSelect} /> */}
+                    <ListaClientes clientes={clientes} onClienteSelect={handleClienteSelect} />
                 </div>
             </ul>
             <div id="choiceModal" className="modal">
@@ -102,3 +114,4 @@ export const ConsumoComponent = ({ clientes, produtos, servicos, empresa }: prop
         </div>
     )
 }
+

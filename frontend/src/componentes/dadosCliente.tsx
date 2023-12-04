@@ -10,6 +10,9 @@ export const DadosCliente = ({ clienteID }: props) => {
 
     const [cliente, setCliente] = useState<ClienteInterface>()
 
+    function formatCPF(cpf: any) {
+        return cpf ? cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4"): ""
+    }
 
     useEffect(() => {
         M.Chips.init(document.querySelectorAll('.chips'))
@@ -29,16 +32,18 @@ export const DadosCliente = ({ clienteID }: props) => {
             <br />
             <h5 className="truncate tooltipped" data-position="top" data-tooltip={cliente?.nome}>Nome: {cliente?.nome}</h5>
             <br />
-            <h5 className="truncate tooltipped" data-position="top" data-tooltip={cliente?.sobreNome}>Sobrenome: {cliente?.sobreNome}</h5>
+            <h5 className="truncate tooltipped" data-position="top" data-tooltip={cliente?.nomeSocial}>Nome Social: {cliente?.nomeSocial}</h5>
             <br />
-            <h5>Email: {cliente?.email}</h5>
+            <h5>Gênero: {cliente?.genero}</h5>
             <br />
-            <h5>Endereço:</h5>
-            <h6><p>
-                Estado: {cliente?.endereco.estado}, Cidade: {cliente?.endereco.cidade}
-                <br/>
-                Rua: {cliente?.endereco.rua}, Nº{cliente?.endereco.numero} - Bairro: {cliente?.endereco.bairro}, CEP: {cliente?.endereco.codigoPostal}
-            </p></h6>
+            <h5>CPF: {formatCPF(cliente?.cpf.valor)}</h5>
+            <br />
+            <h5>RGs:</h5>
+            {cliente?.rgs.map((rg, index) => (
+                <div key={index} className="chip green lighten-3">
+                    RG: {rg.valor} Data de Emissão: {rg.dataEmissao}
+                </div>
+            ))}
             <br />
             <h5>Telefones:</h5>
             {cliente?.telefones.map((telefone, index) => (

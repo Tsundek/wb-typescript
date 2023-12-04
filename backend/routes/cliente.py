@@ -8,17 +8,30 @@ from database.database import get_db, engine
 route = APIRouter(tags=["Cliente"])
 
 def create_cliente():
-    with Session(engine) as session:
-        db_user = cliente_crud.get_cliente(session, id=1)
-        if not db_user:
-            db_cliente = cliente_crud.create_user(
-                db=session,
-                user=schemas.ClienteCreate(
-                    nome="Paysanduuuu",
-                    nomeSocial="Gerson"
-                )
-            )
-            return db_cliente
+    # with Session(engine) as session:
+    #     db_user = cliente_crud.get_cliente(session, id=1)
+    #     db_user2 = cliente_crud.get_cliente(session, id=2)
+    #     if not db_user:
+    #         db_cliente = cliente_crud.create_user(
+    #             db=session,
+    #             user=schemas.ClienteCreate(
+    #                 nome="Paysanduuuu",
+    #                 nomeSocial="Gerson",
+    #                 genero="Masculino"
+    #             )
+    #         )
+    #         return db_cliente
+    #     if not db_user2:
+    #         db_cliente = cliente_crud.create_user(
+    #             db=session,
+    #             user=schemas.ClienteCreate(
+    #                 nome="Ana Carolina",
+    #                 nomeSocial="",
+    #                 genero="Feminino"
+    #             )
+    #         )
+    #         return db_cliente
+    return 'a'
 
 
 @route.get("/cliente/{id}", response_model=schemas.Cliente)
@@ -43,16 +56,16 @@ async def get_all_users(
 
     return user
 
-@route.post("/clientes/", response_model=schemas.ClienteBase)
+@route.post("/clientes/", response_model=schemas.ClienteCreate)
 async def create_user(
     user: schemas.ClienteCreate,
     db: Session = Depends(get_db),
 ):
     return cliente_crud.create_user(db=db, user=user)
 
-@route.put("/clientes/", response_model=schemas.Cliente)
+@route.put("/clientes/", response_model=schemas.ClienteUpdate)
 async def update_user(
-    user: schemas.Cliente,
+    user: schemas.ClienteUpdate,
     db: Session = Depends(get_db),
 ):
     user = cliente_crud.update_user(user=user, db=db)

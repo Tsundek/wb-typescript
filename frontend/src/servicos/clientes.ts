@@ -1,19 +1,29 @@
 import { ClienteInterface } from "../interfaces/cliente"
 
-export const fetchClientesData = async () => {
+export const getAllUsers = async () => {
     try {
-        const response = await fetch("http://localhost:32832/clientes")
-        const data = await response.json()
-
-        return data
+        const response = await fetch("http://localhost:8000/clientes",{
+            method:"GET",
+            headers:{
+                'Content-Type': 'application/json'
+            },
+        })
+        if(response.ok){
+            const data: Array<ClienteInterface> = await response.json()
+            return data
+        } else {
+            M.toast({ html: 'Erro inesperado ao buscar os clientes', classes: 'rounded red' })
+            return new Array<ClienteInterface>()
+        }
     } catch (error) {
         M.toast({ html: 'Erro inesperado ao pegar os dados dos clientes', classes: 'rounded red' })
+        return new Array<ClienteInterface>()
     }
 }
 
 export const fetchClienteByID = async (id: number) => {
     try {
-        const response = await fetch(`http://localhost:32832/cliente/${id}`, {
+        const response = await fetch(`http://localhost:8000/cliente/${id}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -28,16 +38,13 @@ export const fetchClienteByID = async (id: number) => {
 }
 
 
-export const deleteClienteData = async (cliente: ClienteInterface) => {
-    const body = { id: cliente.id }
+export const deleteClienteData = async (id: number) => {
     try {
-        await fetch('http://localhost:32832/cliente/excluir', {
+        await fetch(`http://localhost:8000/clientes/${id}`, {
             method: 'DELETE',
             headers: {
-                'Accept': 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(body)
         })
         M.toast({ html: 'Cliente deletado com sucesso!', classes: 'rounded green' })
     } catch (error) {
@@ -45,9 +52,9 @@ export const deleteClienteData = async (cliente: ClienteInterface) => {
     }
 }
 
-export const atualizaCliente = async (cliente: ClienteInterface) => {
+export const atualizaCliente = async (cliente: any) => {
     try {
-        const response = await fetch('http://localhost:32832/cliente/atualizar', {
+        const response = await fetch('http://localhost:8000/clientes/', {
             method: 'PUT',
             headers: {
                 'Accept': 'application/json',
@@ -62,9 +69,9 @@ export const atualizaCliente = async (cliente: ClienteInterface) => {
     }
 }
 
-export const cadastroCliente = async (cliente: ClienteInterface) => {
+export const cadastroCliente = async (cliente: any) => {
     try {
-        const response = await fetch('http://localhost:32832/cliente/cadastrar', {
+        const response = await fetch('http://localhost:8000/clientes/', {
             method: 'POST',
             headers: {
                 'Accept': 'application/json',

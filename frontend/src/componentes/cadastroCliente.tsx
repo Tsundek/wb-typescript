@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import 'materialize-css/dist/css/materialize.min.css'
 import M from 'materialize-css'
-import { cadastroCliente, fetchClientesData } from '../servicos/clientes'
 import { TelefoneInterface } from '../interfaces/telefone'
-import { EnderecoInterface } from '../interfaces/endereco'
 import { ClienteInterface } from '../interfaces/cliente'
+import { RGInterface } from '../interfaces/rg'
+import { cadastroCliente, getAllUsers } from '../servicos/clientes'
 
 type props = {
     clientes: Array<ClienteInterface>
@@ -12,70 +12,96 @@ type props = {
     tema: string
 }
 
-type formData = {
-    nome: string
-    sobrenome: string
-    email: string
-    endereco: EnderecoInterface
+type RGData = {
+    valor: string
+    dataEmissao: string
+    cliente_id: number
 }
 
-type TelefoneForm = {
+type CPFData = {
+    valor: string
+    dataEmissao: string
+    cliente_id: number
+}
+
+type ClienteData = {
+    nome: string
+    nomeSocial: string
+    genero: string
+}
+
+type TelefoneData = {
     ddd: string
     numero: string
+    cliente_id: number
 }
 
 export const CadastroCliente = ({ clientes, setClientes, tema }: props) => {
     const [ddd, setDdd] = useState('')
     const [numero, setNumero] = useState('')
-    const [telefoneForm, setTelefoneForm] = useState<TelefoneInterface>({
+    const [telefoneData, setTelefoneData] = useState<TelefoneInterface>({
         ddd: '',
-        numero: ''
+        numero: '',
+        cliente_id: 0
     })
-    const [telefones, setTelefones] = useState<Array<TelefoneForm>>(new Array<TelefoneForm>())
+    const [telefones, setTelefones] = useState<Array<TelefoneData>>(new Array<TelefoneData>())
 
-    const [formData, setFormData] = useState<formData>({
+
+    const [valor, setValor] = useState('')
+    const [dataEmissao, setDataEmissao] = useState('')
+    const [rgData, setRGData] = useState<RGInterface>({
+        valor: '',
+        dataEmissao: '',
+        cliente_id: 0
+    })
+    const [rgs, setRgs] = useState<Array<RGData>>(new Array<RGData>())
+
+    const [cpf, setCpf] = useState<CPFData>({
+        valor: '',
+        dataEmissao: '',
+        cliente_id: 0
+    })
+
+    const [clienteData, setClienteData] = useState<ClienteData>({
         nome: '',
-        sobrenome: '',
-        email: '',
-        endereco: {
-            estado: '',
-            cidade: '',
-            bairro: '',
-            rua: '',
-            numero: '',
-            codigoPostal: '',
-            informacoesAdicionais: '',
-        }
+        nomeSocial: '',
+        genero: '',
     })
 
     useEffect(() => {
         M.FormSelect.init(document.querySelectorAll('select'))
         M.CharacterCounter.init(document.querySelectorAll('input'))
-        M.updateTextFields()
         const fetchData = async () => {
-            const clientes = await fetchClientesData()
-            setClientes(clientes)
+            const clientes = await getAllUsers()
+            if (clientes)
+                setClientes(clientes)
         }
         fetchData()
+
     }, [setClientes])
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
         const { id, value } = e.target
-        setFormData((prevData) => ({
+        setClienteData((prevData) => ({
             ...prevData,
             [id]: value,
         }))
     }
 
-    const handleEnderecoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleCPFChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { id, value } = e.target
-        setFormData((prevData) => ({
-            ...prevData,
-            endereco: {
-                ...prevData.endereco,
+        if (id === 'valor' && value !== '') {
+            setCpf((prevData) => ({
+                ...prevData,
                 [id]: value,
-            },
-        }))
+            }))
+        } else if (id === 'dataEmissao' && value !== '') {
+            setCpf((prevData) => ({
+                ...prevData,
+                [id]: value.toString(),
+            }))
+            console.log(cpf)
+        }
     }
 
     const handleTelefoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,9 +112,23 @@ export const CadastroCliente = ({ clientes, setClientes, tema }: props) => {
             setNumero(value)
         }
 
-        setTelefoneForm({ ddd: ddd, numero: numero })
+        setTelefoneData({ ddd: ddd, numero: numero, cliente_id: 0 })
     }
 
+    const addTelefone = () => {
+        if (telefoneData.ddd && telefoneData.numero) {
+            setTelefones((prevTelefones) => [
+                ...prevTelefones,
+                { ddd: telefoneData.ddd, numero: telefoneData.numero, cliente_id: 0 }
+            ])
+            M.toast({ html: 'Número adicionado com sucesso', classes: 'rounded green' })
+            setTelefoneData({ ddd: '', numero: '', cliente_id: 0 })
+            setDdd('')
+            setNumero('')
+        } else {
+            M.toast({ html: 'Preencha DDD e Número', classes: 'rounded red' })
+        }
+    }
 
     const removeTelefone = (index: number) => {
         setTelefones((prevTelefones) =>
@@ -98,68 +138,106 @@ export const CadastroCliente = ({ clientes, setClientes, tema }: props) => {
         )
     }
 
+    const handleRGChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { id, value } = e.target
+        if (id === 'valor' && value !== '') {
+            setValor(value)
+        } else if (id === 'dataEmissao' && value !== '') {
+            setDataEmissao(value.toString())
+        }
 
-    const addTelefone = () => {
-        if (telefoneForm.ddd && telefoneForm.numero) {
-            setTelefones((prevTelefones) => [
-                ...prevTelefones,
-                { ddd: telefoneForm.ddd, numero: telefoneForm.numero }
+        setRGData((prevData) => ({
+            ...prevData,
+            valor: id === 'valor' ? value : prevData.valor,
+            dataEmissao: id === 'dataEmissao' ? value : prevData.dataEmissao,
+        }))
+    }
+
+    const addRG = () => {
+        if (rgData.valor && rgData.dataEmissao) {
+            setRgs((prevRgs) => [
+                ...prevRgs,
+                { valor: rgData.valor, dataEmissao: rgData.dataEmissao, cliente_id: 0 }
             ])
-            M.toast({ html: 'Número adicionado com sucesso', classes: 'rounded green' })
-            setTelefoneForm({ ddd: '', numero: '' })
-            setDdd('')
-            setNumero('')
+            M.toast({ html: 'RG adicionado com sucesso', classes: 'rounded green' })
+            setRGData({ valor: '', dataEmissao: '', cliente_id: 0 })
+            setValor('')
+            setDataEmissao('')
         } else {
-            M.toast({ html: 'Preencha DDD e Número', classes: 'rounded red' })
+            M.toast({ html: 'Preencha Valor e Data de Emissão', classes: 'rounded red' })
         }
     }
 
+    const removeRG = (index: number) => {
+        setRgs((prevRgs) =>
+            prevRgs.filter((rg, i) =>
+                i !== index
+            )
+        )
+    }
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault()
-        const body: ClienteInterface = {
-            nome: formData.nome,
-            sobreNome: formData.sobrenome,
-            email: formData.email,
-            endereco: {
-                estado: formData.endereco.estado,
-                cidade: formData.endereco.cidade,
-                bairro: formData.endereco.bairro,
-                rua: formData.endereco.rua,
-                numero: formData.endereco.numero,
-                codigoPostal: formData.endereco.codigoPostal,
-                informacoesAdicionais: formData.endereco.informacoesAdicionais,
+        console.log(cpf.dataEmissao)
+        const body = {
+            nome: clienteData.nome,
+            nomeSocial: clienteData.nomeSocial,
+            genero: clienteData.genero,
+            cpf: {
+                valor: cpf.valor,
+                dataEmissao: cpf.dataEmissao,
+                cliente_id: 0,
             },
-            telefones: telefones
+            rgs: rgs.map((rg) => ({
+                valor: rg.valor,
+                dataEmissao: rg.dataEmissao,
+                cliente_id: 0,
+                id: 0,
+            })),
+            telefones: telefones.map((telefone) => ({
+                ddd: telefone.ddd,
+                numero: telefone.numero,
+                cliente_id: 0,
+            }))
         }
-        
+        console.log(body)
+
         const response = await cadastroCliente(body)
         if (response) {
-            const updatedClientes = await fetchClientesData()
-            setClientes(updatedClientes)
-            setFormData({
+            const updatedClientes = await getAllUsers()
+            if (updatedClientes)
+                setClientes(updatedClientes)
+
+
+            setClienteData({
                 nome: '',
-                sobrenome: '',
-                email: '',
-                endereco: {
-                    estado: '',
-                    cidade: '',
-                    bairro: '',
-                    rua: '',
-                    numero: '',
-                    codigoPostal: '',
-                    informacoesAdicionais: '',
-                }
+                nomeSocial: '',
+                genero: '',
             })
             setDdd('')
             setNumero('')
-            setTelefoneForm({
+            setTelefoneData({
                 ddd: '',
-                numero: ''
+                numero: '',
+                cliente_id: 0
             })
-            setTelefones(new Array<TelefoneForm>())
+            setTelefones(new Array<TelefoneData>())
+            setValor('')
+            setDataEmissao('')
+            setRGData({
+                valor: '',
+                dataEmissao: '',
+                cliente_id: 0,
+            });
+            setRgs(new Array<RGData>())
+            setCpf({
+                valor: '',
+                dataEmissao: '',
+                cliente_id: 0,
+            })
         }
     }
+
 
 
     let estiloBotao = `btn waves-effect waves-light ${tema}`
@@ -170,53 +248,58 @@ export const CadastroCliente = ({ clientes, setClientes, tema }: props) => {
                     <h4>Cadastro de Clientes</h4>
                     <div className="row">
                         <div className="input-field col s12">
-                            <input required id="nome" type="text" className="validate" value={formData.nome} onChange={handleChange} />
+                            <input required id="nome" type="text" className="validate" value={clienteData.nome} onChange={handleChange} />
                             <label htmlFor="nome">Nome<span className="red-text"> *</span></label>
                         </div>
                         <div className="input-field col s12">
-                            <input required id="sobrenome" type="text" className="validate" value={formData.sobrenome} onChange={handleChange} />
-                            <label htmlFor="sobrenome">Sobrenome<span className="red-text"> *</span></label>
+                            <input id="nomeSocial" type="text" className="validate" value={clienteData.nomeSocial} onChange={handleChange} />
+                            <label htmlFor="nomeSocial">Nome social<span className="red-text"> *</span></label>
                         </div>
                         <div className="input-field col s12">
-                            <input id="email" type="email" className="validate" required value={formData.email} onChange={handleChange} />
-                            <label htmlFor="email">Email<span className="red-text"> *</span></label>
+                            <select id="genero" value={clienteData.genero || ''} onChange={handleChange}>
+                                <option value="" disabled>Escolha o gênero</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Feminino">Feminino</option>
+                            </select>
+                            <label htmlFor="genero">Gênero<span className="red-text"> *</span></label>
                         </div>
                     </div>
-                    <h5>Endereço</h5>
+                    <h5>CPF</h5>
                     <div className="row">
                         <div className="input-field col s6">
-                            <label htmlFor="bairro">Bairro<span className="red-text"> *</span></label>
-                            <input required type="text" id="bairro" className="validate" value={formData.endereco.bairro} onChange={handleEnderecoChange} />
+                            <label htmlFor="valor">Valor<span className="red-text"> *</span></label>
+                            <input required type="number" id="valor" className="validate" value={cpf.valor} onChange={handleCPFChange} />
                         </div>
                         <div className="input-field col s6">
-                            <label htmlFor="rua">Rua<span className="red-text"> *</span></label>
-                            <input required type="text" id="rua" className="validate" value={formData.endereco.rua} onChange={handleEnderecoChange} />
+                            <label htmlFor="dataEmissao" className='active'>Data de emissão<span className="red-text"> *</span></label>
+                            <input required type="date" id="dataEmissao" className="validate" value={cpf.dataEmissao} onChange={handleCPFChange} />
                         </div>
                     </div>
+
+                    <h5>RGs</h5>
                     <div className="row">
                         <div className="input-field col s6">
-                            <label htmlFor="numero">Número<span className="red-text"> *</span></label>
-                            <input required type="number" id="numero" className="validate" value={formData.endereco.numero} onChange={handleEnderecoChange} />
+                            <label htmlFor="valor">Valor<span className="red-text"> *</span></label>
+                            <input type="number" id="valor" value={valor} onChange={handleRGChange} />
                         </div>
                         <div className="input-field col s6">
-                            <label htmlFor="codigoPostal">Código Postal<span className="red-text"> *</span></label>
-                            <input required type="text" id="codigoPostal" className="validate" value={formData.endereco.codigoPostal} onChange={handleEnderecoChange} />
+                            <label htmlFor="dataEmissao" className='active'>Data de emissão<span className="red-text"> *</span></label>
+                            <input type="date" id="dataEmissao" value={dataEmissao} onChange={handleRGChange} />
                         </div>
+                        <button type="button" className="right btn" onClick={addRG}>
+                            Adicionar RG
+                        </button>
                     </div>
                     <div className="row">
-                        <div className="input-field col s6">
-                            <input required type="text" id="estado" className="validate" value={formData.endereco.estado} onChange={handleEnderecoChange} />
-                            <label htmlFor="estado">Estado<span className="red-text"> *</span></label>
-                        </div>
-                        <div className="input-field col s6">
-                            <label htmlFor="cidade">Cidade<span className="red-text"> *</span></label>
-                            <input required type="text" id="cidade" className="validate" value={formData.endereco.cidade} onChange={handleEnderecoChange} />
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="input-field col s12">
-                            <label htmlFor="informacoesAdicionais">Informações adicionais<span className="red-text"> *</span></label>
-                            <input required type="text" id="informacoesAdicionais" className="validate" value={formData.endereco.informacoesAdicionais} onChange={handleEnderecoChange} />
+                        <div className="col s12">
+                            {
+                                rgs.map((rg, index) => {
+                                    return (
+                                        <div key={rg.valor + index} className='chip blue lighten-3 btn' onClick={() => removeRG(index)}>
+                                            <span className='black-text'>RG: {rg.valor} Data de Emissão: {rg.dataEmissao}</span>
+                                        </div>
+                                    )
+                                })}
                         </div>
                     </div>
 

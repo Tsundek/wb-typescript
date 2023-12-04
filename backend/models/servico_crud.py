@@ -3,15 +3,15 @@ from database import schemas
 from database.database import Base
 from sqlalchemy.orm import relationship, Session
 
+from models import cliente_crud, services_consumed
+
 class Servico(Base):
     __tablename__ = "servico"
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     nome = Column(String(100))
     valor = Column(Numeric(precision=7, scale=2))
-    quantidade = Column(Numeric(5,0))
-    cliente_id = Column(Integer, ForeignKey("cliente.id"))
-    cliente = relationship("Cliente", back_populates="servicos", lazy="select")
+    consumido_por = relationship('Cliente', secondary='cliente_servico_association', back_populates='servicos_consumidos')
 
 
 def get_servico(db: Session, id: int):
@@ -26,8 +26,6 @@ def create_servico(db: Session, servico: schemas.ServicoCreate):
     db_servico = Servico(
         nome=servico.nome,
         valor=servico.valor,
-        quantidade=servico.quantidade,
-        cliente_id=servico.cliente_id
     )
     db.add(db_servico)
     db.commit()
@@ -41,7 +39,6 @@ def update_servico(db: Session, servico: schemas.ServicoUpdate):
     if db_servico:
         db_servico.nome = servico.nome
         db_servico.valor = servico.valor
-        db_servico.quantidade = servico.quantidade
 
         db.commit()
         db.refresh(db_servico)
@@ -57,3 +54,25 @@ def delete_servico(db: Session, id: int):
         db.commit()
 
     return db_servico
+
+def consumo_servico(db: Session, servico_id: int, cliente_id: int, quantidade: int = 1):
+    db_servico = db.query(Servico).get(servico_id)
+    db_cliente = db.query(cliente_crud.Cliente).get(cliente_id)
+
+    if db_servico and db_cliente:
+        association = db.query(services_consumed.ClientServiceAssociation).filter_by(cliente_id=cliente_id, servico_id=servico_id).first()
+        if association:
+            association.quantidade += quantidade
+
+        else:
+            association = services_consumed.ClientServiceAssociation(
+                cliente_id=cliente_id,
+                servico_id=servico_id,
+                quantidade=quantidade
+            )
+            db.add(association)
+
+        db.commit()
+        return True
+
+    return False

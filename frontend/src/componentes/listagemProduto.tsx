@@ -5,16 +5,14 @@ import { ListaTopMenosConsumidos } from "./listaTopMenosConsumidos"
 import { ListaTopMaisConsumidos } from "./listaTopMaisConsumidos"
 
 import 'materialize-css/dist/css/materialize.min.css'
-import Produto from "../modelos/produto"
-import Empresa from "../modelos/empresa"
+import { ProdutoInterface } from "../interfaces/produto"
 
 type props = {
-    produtos: Array<Produto>
-    onProdutoSelect: (produto: Produto) => void
-    empresa: Empresa
+    produtos: Array<ProdutoInterface>
+    onProdutoSelect: (produto: ProdutoInterface) => void
 }
 
-export const ListagemProdutos = ({ produtos, onProdutoSelect, empresa }: props) => {
+export const ListagemProdutos = ({ produtos, onProdutoSelect }: props) => {
     useEffect(() => {
         M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'))
         M.Tabs.init(document.querySelectorAll('.tabs'), { swipeable: false })
@@ -40,10 +38,10 @@ export const ListagemProdutos = ({ produtos, onProdutoSelect, empresa }: props) 
                             <ListaItems items={produtos} onItemSelect={onProdutoSelect} />
                         </div>
                         <div id="ListaMenosProdutosConsumidos" style={divStyle}>
-                            <ListaTopMenosConsumidos empresa={empresa} onItemSelect={onProdutoSelect} tipo={'produto'} />
+                            <ListaTopMenosConsumidos tipo={'produto'} />
                         </div>
                         <div id="ListaMaisProdutosConsumidos" style={divStyle}>
-                            <ListaTopMaisConsumidos empresa={empresa} onItemSelect={onProdutoSelect} tipo={'produto'} />
+                            <ListaTopMaisConsumidos tipo={'produto'} />
                         </div>
                     </div>
                 </ul>

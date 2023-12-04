@@ -1,36 +1,38 @@
 import React, { useEffect, useState } from 'react'
 import 'materialize-css/dist/css/materialize.min.css'
 import M from 'materialize-css'
-import Empresa from '../modelos/empresa'
-import Produto from '../modelos/produto'
-import Servico from '../modelos/servico'
+import { ProdutoInterface } from '../interfaces/produto'
+import { ServicoInterface } from '../interfaces/servico'
+import { atualizaProduto, atualizaServico, getAllProducts, getAllServices } from '../servicos/items'
 
-type Item = Produto | Servico
+type Item = ProdutoInterface | ServicoInterface
 
 type props = {
-    onSubmit: (empresa: Empresa) => void
-    empresa: Empresa
     items: Item[]
     tipo: 'produto' | 'servico'
+    setItems: React.Dispatch<React.SetStateAction<ProdutoInterface[] | ServicoInterface[]>>
 }
 
-export const AtualizacaoItem = ({ onSubmit, items, empresa, tipo }: props) => {
-    const [indice, setIndice] = useState<number>(-1)
-    const [itemSelecionado, setItemSelecionado] = useState<Item>(tipo === 'produto' ? new Produto('', 0) : new Servico('', 0))
+export const AtualizacaoItem = ({ items, tipo, setItems }: props) => {
+    const [itemSelecionado, setItemSelecionado] = useState<Item>(
+        tipo === 'produto'
+            ? { nome: '', valor: 0 }
+            : { nome: '', valor: 0 }
+    )
 
     useEffect(() => {
         M.Tooltip.init(document.querySelectorAll('.tooltipped'), { enterDelay: 250 })
         M.FormSelect.init(document.querySelectorAll('select'))
         M.CharacterCounter.init(document.querySelectorAll('input'))
         M.updateTextFields()
-        M.Modal.init(document.querySelectorAll('.modal'))
+        M.Modal.init(document.querySelectorAll('.modal'), {
+            onOpenStart: () => {
+                M.updateTextFields()
+                M.FormSelect.init(document.querySelectorAll('select'))
+                M.CharacterCounter.init(document.querySelectorAll('input'))
+            }
+        })
     }, [])
-
-    const handleCatchIndex = (index: number) => {
-        const item = items[index]
-        setIndice(index)
-        setItemSelecionado(item)
-    }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const id = event.target.id as 'nome' | 'valor'
@@ -42,21 +44,23 @@ export const AtualizacaoItem = ({ onSubmit, items, empresa, tipo }: props) => {
         }))
     }
 
-    const handleUpdate = (event: React.FormEvent) => {
+    const handleUpdate = async (event: React.FormEvent) => {
         event.preventDefault()
-        if (indice !== -1) {
-            if (tipo === 'produto') {
-                empresa.atualizarProdutos(indice, itemSelecionado as Produto);
-            } else {
-                empresa.atualizarServicos(indice, itemSelecionado as Servico);
-            }
-            onSubmit(empresa)
-            setIndice(-1)
-            setItemSelecionado(tipo === 'produto' ? new Produto('', 0) : new Servico('', 0))
-            M.toast({ html: 'Item atualizado com sucesso!', classes: 'rounded green' })
+        if (tipo === 'produto') {
+            await atualizaProduto(itemSelecionado)
+            const produtos = await getAllProducts()
+            if (produtos)
+                setItems(produtos)
         } else {
-            M.toast({ html: 'Escolha um item para editar!', classes: 'rounded red' })
+            await atualizaServico(itemSelecionado)
+            const servicos = await getAllServices()
+            if (servicos)
+                setItems(servicos)
         }
+        setItemSelecionado(
+            tipo === 'produto'
+                ? { nome: '', valor: 0}
+                : { nome: '', valor: 0})
     }
 
     return (
@@ -76,10 +80,10 @@ export const AtualizacaoItem = ({ onSubmit, items, empresa, tipo }: props) => {
                             <tbody>
                                 {items.map((item, index) => (
                                     <tr key={index}>
-                                        <td>{index}</td>
+                                        <td>{item.id}</td>
                                         <td className="truncate tooltipped" data-position="top" data-tooltip={item.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{item.nome}</td>
                                         <td>R$ {item.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                        <td><a href='#modal1' className="modal-trigger btn-floating yellow darken-3 btn-small" onClick={() => handleCatchIndex(index)}><i className="material-icons">edit</i></a></td>
+                                        <td><a href='#modal1' className="modal-trigger btn-floating yellow darken-3 btn-small" onClick={() => setItemSelecionado(item)}><i className="material-icons">edit</i></a></td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -97,7 +101,7 @@ export const AtualizacaoItem = ({ onSubmit, items, empresa, tipo }: props) => {
                                 <label htmlFor="nome">Nome do {tipo === 'produto' ? 'Produto' : 'Serviço'}</label>
                             </div>
                             <div className="input-field col s6">
-                                <input id="valor" type="number" className="validate" value={itemSelecionado.valor} onChange={handleChange} />
+                                <input id="valor" type="number" className="validate" data-length="7" value={itemSelecionado.valor} onChange={handleChange} />
                                 <label htmlFor="nomeSocial">Valor</label>
                             </div>
                         </div>

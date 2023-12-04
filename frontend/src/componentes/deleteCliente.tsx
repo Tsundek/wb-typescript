@@ -19,9 +19,9 @@ export const DeleteCliente = ({ clientes, setClientes }: props) => {
     }, [])
 
     const handleConfirm = async () => {
-        if (selectedCliente) {
+        if (selectedCliente?.id) {
             try {
-                deleteClienteData(selectedCliente)
+                deleteClienteData(selectedCliente.id)
                 setClientes((prevClientes) =>
                     prevClientes.filter((cliente) => cliente.id !== selectedCliente.id)
                 )
@@ -51,7 +51,7 @@ export const DeleteCliente = ({ clientes, setClientes }: props) => {
                                     <tr key={index}>
                                         <td>{cliente.id}</td>
                                         <td className="truncate tooltipped" data-position="top" data-tooltip={cliente.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{cliente.nome}</td>
-                                        <td>{cliente.sobreNome}</td>
+                                        <td>{cliente.nomeSocial}</td>
                                         <td><a href='#modal1' className="modal-trigger btn-floating red btn-small" onClick={() => setSelectedCliente(cliente)}><i className="material-icons">delete</i></a></td>
                                     </tr>
                                 ))}

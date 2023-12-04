@@ -1,35 +1,42 @@
 import { useEffect, useState } from 'react'
 import 'materialize-css/dist/css/materialize.min.css'
 import M from 'materialize-css'
-import Empresa from '../modelos/empresa'
+import { ProdutoInterface } from '../interfaces/produto'
+import { ServicoInterface } from '../interfaces/servico'
+import { deleteProductData, deleteServiceData, getAllProducts, getAllServices } from '../servicos/items'
+
 
 type props = {
-    onSubmit: (empresa: Empresa) => void
-    empresa: Empresa
-    items: { nome: string; valor: number }[]
+    items: { id?: number; nome: string; valor: number }[]
     tipo: 'produto' | 'servico'
+    setItems: React.Dispatch<React.SetStateAction<ProdutoInterface[] | ServicoInterface[]>>
 }
 
-export const DeleteItem = ({ onSubmit, empresa, tipo, items }: props) => {
-    const [indice, setIndice] = useState<number>(-1)
+export const DeleteItem = ({ tipo, items, setItems }: props) => {
+    const [selectedItem, setSelectedItem] = useState<ProdutoInterface | ServicoInterface>()
 
     useEffect(() => {
         M.Tooltip.init(document.querySelectorAll('.tooltipped'), { enterDelay: 250 });
         M.updateTextFields();
-        M.Modal.init(document.querySelectorAll('.modal'));
+        M.Modal.init(document.querySelectorAll('.modal'))
     }, [])
 
-    const handleConfirm = () => {
-        if (indice !== -1) {
+    const handleConfirm = async () => {
+        if (selectedItem?.id) {
             if (tipo === 'produto') {
-                empresa.deletarProdutos(indice)
+                await deleteProductData(selectedItem.id)
+                const produtos = await getAllProducts()
+                if (produtos)
+                    setItems(produtos)
             } else {
-                empresa.deletarServicos(indice)
+                await deleteServiceData(selectedItem.id)
+                const servicos = await getAllServices()
+                if (servicos)
+                    setItems(servicos)
             }
-            onSubmit(empresa)
+
         }
-        setIndice(-1)
-        M.toast({ html: `${tipo === 'produto' ? 'Produto' : 'Serviço'} deletado com sucesso!`, classes: 'rounded green' })
+        setSelectedItem(undefined)
     }
 
     return (
@@ -49,10 +56,10 @@ export const DeleteItem = ({ onSubmit, empresa, tipo, items }: props) => {
                             {items.map((item, index) => (
                                 <tbody key={index}>
                                     <tr>
-                                        <td>{index}</td>
+                                        <td>{item.id}</td>
                                         <td className="truncate tooltipped" data-position="top" data-tooltip={item.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{item.nome}</td>
                                         <td>R$ {item.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                                        <td><a href="#modal1" className="modal-trigger btn-floating red btn-small" onClick={() => setIndice(index)}><i className="material-icons">delete</i></a></td>
+                                        <td><a href="#modal1" className="modal-trigger btn-floating red btn-small" onClick={() => setSelectedItem(item)}><i className="material-icons">delete</i></a></td>
                                     </tr>
                                 </tbody>
                             ))}
@@ -63,8 +70,8 @@ export const DeleteItem = ({ onSubmit, empresa, tipo, items }: props) => {
             <div id="modal1" className="modal">
                 <div className="modal-content">
                     <h4>Confirmação</h4>
-                    <p className="truncate tooltipped" data-position="top" data-tooltip={indice >= 0 && items[indice] && items[indice].nome} style={{ display: "block" }}>
-                        {`Você tem certeza de que deseja deletar o ${tipo === 'produto' ? 'produto' : 'serviço'} ${indice} - ${indice >= 0 && items[indice] && items[indice].nome}?`}
+                    <p className="truncate tooltipped" data-position="top" data-tooltip={selectedItem?.nome} style={{ display: "block" }}>
+                        {`Você tem certeza de que deseja deletar o ${tipo === 'produto' ? 'produto' : 'serviço'} ${selectedItem?.id} - ${selectedItem?.nome}?`}
                     </p>
                 </div>
                 <div className="modal-footer">

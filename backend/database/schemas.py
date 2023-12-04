@@ -23,9 +23,7 @@ class TelefoneUpdate(BaseModel):
 class ServicoBase(BaseModel):
     nome: str
     valor: float
-    quantidade: float
-    cliente_id: int
-
+    
 class ServicoCreate(ServicoBase):
     pass
 
@@ -36,16 +34,14 @@ class Servico(ServicoBase):
         from_attributes = True
 
 class ServicoUpdate(BaseModel):
+    id: int
     nome: str
     valor: float
-    quantidade: float
 
 
 class ProdutoBase(BaseModel):
     nome: str
     valor: float
-    quantidade: float
-    cliente_id: int
 
 class ProdutoCreate(ProdutoBase):
     pass
@@ -57,9 +53,9 @@ class Produto(ProdutoBase):
         from_attributes = True
 
 class ProdutoUpdate(BaseModel):
+    id: int
     nome: str
     valor: float
-    quantidade: float
 
 class RgBase(BaseModel):
     valor: str
@@ -101,9 +97,13 @@ class CpfUpdate(BaseModel):
 
 class ClienteBase(BaseModel):
     nome: str
-    nomeSocial: str
+    nomeSocial: str | None
+    genero: str
 
 class ClienteCreate(ClienteBase):
+    cpf: CpfCreate | None
+    rgs: List[RgCreate] | None
+    telefones: List[TelefoneCreate] | None
     pass
 
 class Cliente(ClienteBase):
@@ -111,8 +111,6 @@ class Cliente(ClienteBase):
     cpf: Cpf | None
     rgs: List[Rg] | None
     telefones: List[Telefone] | None
-    servicos: List[Servico] | None
-    produtos: List[Produto] | None
 
     class Config:
         from_attributes = True
@@ -122,3 +120,12 @@ class ClienteResponse(BaseModel):
 
 class ClienteListResponse(BaseModel):
     clientes: List[Cliente]
+
+class ClienteUpdate(BaseModel):
+    id: int
+    nome: str
+    nomeSocial: str | None
+    genero: str
+    cpf: Cpf
+    rgs: List[Rg]
+    telefones: List[Telefone]

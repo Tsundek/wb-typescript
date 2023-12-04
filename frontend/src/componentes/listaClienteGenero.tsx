@@ -1,14 +1,14 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import { useEffect } from "react";
 import 'materialize-css/dist/css/materialize.min.css'
-import Cliente from "../modelos/cliente";
+import { ClienteInterface } from "../interfaces/cliente";
 
 type props = {
-    clientes: Array<Cliente>
-    onClienteSelect: (cliente: Cliente) => void
+    clientes: Array<ClienteInterface>
+    onClienteSelect: (cliente: ClienteInterface) => void
 }
 function formatCPF(cpf: string) {
-    return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    return cpf ? cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : ""
 }
 
 export const ListaClientesGenero = ({ clientes, onClienteSelect }: props) => {
@@ -30,7 +30,7 @@ export const ListaClientesGenero = ({ clientes, onClienteSelect }: props) => {
                             <p>
                                 Gênero: {cliente.genero}
                                 <br />
-                                CPF: {formatCPF(cliente.cpf.getValor)}
+                                CPF: {formatCPF(cliente.cpf.valor)}
                             </p>
                         </a>
                     ))
@@ -47,7 +47,7 @@ export const ListaClientesGenero = ({ clientes, onClienteSelect }: props) => {
                             <p>
                                 Gênero: {cliente.genero}
                                 <br />
-                                CPF: {formatCPF(cliente.cpf.getValor)}
+                                CPF: {formatCPF(cliente.cpf.valor)}
                             </p>
                         </a>
                     ))

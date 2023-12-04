@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import schemas
-from models import servico_crud
+from models import servico_crud, services_consumed
 from database.database import get_db
 
 route = APIRouter(tags=["Serviço"])
@@ -58,3 +58,25 @@ async def delete_servico(
     db: Session = Depends(get_db),
 ):
     return servico_crud.delete_servico(id=id, db=db)
+
+@route.post("/servico/consumir/{cliente_id}/{servico_id}")
+async def consumir_servico(
+    cliente_id: int,
+    servico_id: int,
+    db: Session = Depends(get_db),
+):
+    resposta = servico_crud.consumo_servico(db=db, servico_id=servico_id, cliente_id=cliente_id)
+    if (resposta == False):
+        raise HTTPException(status_code=404, detail="Erro ao consumir serviço")
+    
+
+@route.get("/servicos/consumidos")
+async def get_all_servicos(
+    db: Session = Depends(get_db),
+):
+    servico = services_consumed.get_all_servicosConsumidos(db=db)
+
+    if not servico:
+        raise HTTPException(status_code=404, detail="Serviço não existe")
+
+    return servico

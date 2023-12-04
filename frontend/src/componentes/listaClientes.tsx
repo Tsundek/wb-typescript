@@ -22,7 +22,9 @@ export const ListaClientes = ({ clientes, onClienteSelect }: props) => {
                             <i className="material-icons medium circle">account_circle</i>
                             <span className="title tooltipped" data-position="top" data-tooltip={cliente.nome}>Nome: {cliente.nome}</span>
                             <p>
-                                Sobrenome: {cliente.sobreNome}
+                                Nome social: {cliente.nomeSocial}
+                                <br />
+                                Gênero: {cliente.genero}
                                 <br />
                                 ID: {cliente.id}
                             </p>

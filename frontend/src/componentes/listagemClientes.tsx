@@ -2,16 +2,18 @@ import { useEffect } from "react"
 import {ListaClientes} from "./listaClientes"
 import 'materialize-css/dist/css/materialize.min.css'
 
-import Empresa from "../modelos/empresa"
+
 import { ClienteInterface } from "../interfaces/cliente"
+import { ListaClientesGenero } from "./listaClienteGenero"
+import { ListaTopMaisConsumidosValor } from "./listaMaisConsumidoValor"
 
 type props = {
     clientes: Array<ClienteInterface>
     onClienteSelect: (cliente: ClienteInterface) => void
-    empresa: Empresa
+
 }
 
-export const ListagemClientes = ({ clientes, onClienteSelect, empresa }: props) => {
+export const ListagemClientes = ({ clientes, onClienteSelect }: props) => {
     useEffect(() => {
         M.FloatingActionButton.init(document.querySelectorAll('.fixed-action-btn'))
         M.Tabs.init(document.querySelectorAll('.tabs'), { swipeable: false })
@@ -28,9 +30,20 @@ export const ListagemClientes = ({ clientes, onClienteSelect, empresa }: props) 
                             <h4>Lista de Clientes</h4>
                         </div>
                     </li>
+                    <ul className="tabs tabs-fixed-width tab-demo">
+                        <li className="tab"><a href="#ListaClientes">Geral</a></li>
+                        <li className="tab"><a href="#ListaClientesGenero">Gênero</a></li>
+                        <li className="tab"><a href="#ListaMaisConsumidosValor">Maior Valor Consumido</a></li>
+                    </ul>
                     <div className="tabs-content">
                         <div id="ListaClientes" style={divStyle}>
                             <ListaClientes clientes={clientes} onClienteSelect={onClienteSelect} />
+                        </div>
+                        <div id="ListaClientesGenero" style={divStyle}>
+                            <ListaClientesGenero clientes={clientes} onClienteSelect={onClienteSelect} />
+                        </div>
+                        <div id="ListaMaisConsumidosValor" style={divStyle}>
+                            <ListaTopMaisConsumidosValor onClienteSelect={onClienteSelect} />
                         </div>
                     </div>
                 </ul>

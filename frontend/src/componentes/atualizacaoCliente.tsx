@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react'
 import 'materialize-css/dist/css/materialize.min.css'
 import M from 'materialize-css'
 import { ClienteInterface } from '../interfaces/cliente'
-import { atualizaCliente, fetchClientesData } from '../servicos/clientes'
+import { atualizaCliente, getAllUsers } from '../servicos/clientes'
 
 type props = {
     clientes: Array<ClienteInterface>
     setClientes: React.Dispatch<React.SetStateAction<ClienteInterface[]>>
+}
+
+function formatCPF(cpf: string) {
+    return cpf ? cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4") : ""
 }
 
 export const AtualizacaoCliente = ({ clientes, setClientes }: props) => {
@@ -18,70 +22,108 @@ export const AtualizacaoCliente = ({ clientes, setClientes }: props) => {
         M.Tooltip.init(document.querySelectorAll('.tooltipped'), { enterDelay: 250 })
         M.FormSelect.init(document.querySelectorAll('select'))
         M.CharacterCounter.init(document.querySelectorAll('input'))
-        M.updateTextFields()
         M.Modal.init(document.querySelectorAll('.modal'), {
             onCloseEnd: () => {
                 setSelectedCliente(null)
                 setIsFormComplete(false)
+            },
+            onOpenStart: () => {
+                M.updateTextFields()
+                M.FormSelect.init(document.querySelectorAll('select'))
+                M.CharacterCounter.init(document.querySelectorAll('input'))
             }
         })
     }, [])
 
     const checkFormCompleteness = (selectedCliente: ClienteInterface) => {
         if (selectedCliente) {
-            const isEnderecoComplete =
-                selectedCliente.endereco.rua.trim() !== '' &&
-                selectedCliente.endereco.numero.trim() !== '' &&
-                selectedCliente.endereco.bairro.trim() !== '' &&
-                selectedCliente.endereco.cidade.trim() !== '' &&
-                selectedCliente.endereco.estado.trim() !== '' &&
-                selectedCliente.endereco.codigoPostal.trim() !== '' &&
-                selectedCliente.endereco.informacoesAdicionais.trim() !== ''
+            const isCPFComplete =
+                selectedCliente.cpf.valor.trim() !== '' &&
+                selectedCliente.cpf.dataEmissao.trim() !== '' &&
+                selectedCliente.cpf.valor.trim().length <= 11
+
 
             const areTelefonesComplete =
                 !!selectedCliente.telefones &&
                 selectedCliente.telefones.every(
-                    (telefone) => telefone.ddd.trim() !== '' && telefone.numero.trim() !== ''
+                    (telefone) => telefone.ddd.trim().length >= 2 && telefone.ddd.trim() !== '' && telefone.numero.trim() !== '' && telefone.numero.trim().length <= 12
                 )
 
-            const isEmailValid = /^[^\s@]+@[^@\s]+$/.test(selectedCliente.email.trim())
+
+            const areRgsComplete =
+                !!selectedCliente.rgs &&
+                selectedCliente.rgs.every(
+                    (rg) => rg.valor.trim() !== '' && rg.dataEmissao.trim() !== '' && rg.valor.trim().length <= 9
+                )
 
             const areFormFieldsComplete =
                 selectedCliente.nome.trim() !== '' &&
-                selectedCliente.sobreNome.trim() !== '' &&
-                isEmailValid &&
-                isEnderecoComplete &&
+                selectedCliente.genero.trim() !== '' &&
+                areRgsComplete &&
+                isCPFComplete &&
                 areTelefonesComplete
 
             setIsFormComplete(areFormFieldsComplete)
         }
     }
+    const handleListChange = (event: React.ChangeEvent<HTMLInputElement>, index: number) => {
+        const id = event.target.id as 'RgValor' | 'RgDataEmissao' | 'ddd' | 'numero'
+        const value = event.target.value
 
+        if (selectedCliente) {
+            let clienteAtualizado: ClienteInterface = {
+                ...selectedCliente,
+                cpf: { ...selectedCliente.cpf },
+                rgs: [...selectedCliente.rgs],
+                telefones: [...selectedCliente.telefones],
+
+            }
+
+            if (id === 'ddd' || id === 'numero') {
+                const rgIndex = index
+                if (index !== undefined && !isNaN(index) && index >= 0 && index < clienteAtualizado.telefones.length) {
+                    clienteAtualizado.telefones[rgIndex] = {
+                        ...clienteAtualizado.telefones[rgIndex],
+                        [id]: value,
+                    }
+                }
+            } else if (id === 'RgValor') {
+                const chaveData = 'valor'
+                clienteAtualizado.rgs[index] = {
+                    ...clienteAtualizado.rgs[index],
+                    [chaveData]: value,
+                }
+
+            } else if (id === 'RgDataEmissao') {
+                const chaveData = 'dataEmissao'
+                clienteAtualizado.rgs[index] = {
+                    ...clienteAtualizado.rgs[index],
+                    [chaveData]: value,
+                }
+            }
+            setSelectedCliente(clienteAtualizado)
+            checkFormCompleteness(clienteAtualizado)
+        }
+    }
 
     const handleChange = (event: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>, index?: number) => {
-        const id = event.target.id as 'ddd' | 'estado' | 'cidade' | 'bairro' | 'rua' | 'numero' | 'codigoPostal' | 'informacoesAdicionais' | 'nome' | 'email' | 'sobreNome'
+        const id = event.target.id as 'nome' | 'nomeSocial' | 'cidade' | 'genero' | 'valor' | 'dataEmissao' | 'ddd' | 'numero' | 'nome' | 'email' | 'sobreNome'
         const value = event.target.value
-        const title = event.target.title as 'endereco' | 'telefone'
 
         if (selectedCliente) {
             const clienteAtualizado: ClienteInterface = {
                 ...selectedCliente,
-                telefones: [...selectedCliente.telefones]
-            }
+                cpf: { ...selectedCliente.cpf },
+                rgs: [...selectedCliente.rgs],
+                telefones: [...selectedCliente.telefones],
 
-            if (id === 'ddd' || (id === 'numero' && title === 'telefone')) {
-                if (index !== undefined && !isNaN(index) && index >= 0 && index < clienteAtualizado.telefones.length) {
-                    clienteAtualizado.telefones[index] = {
-                        ...clienteAtualizado.telefones[index],
-                        [id]: value,
-                    }
-                }
-            } else if (id === 'estado' || id === 'cidade' || id === 'bairro' || id === 'rua' || (id === 'numero' && title === 'endereco') || id === 'codigoPostal' || id === 'informacoesAdicionais') {
-                clienteAtualizado.endereco = {
-                    ...clienteAtualizado.endereco,
+            }
+            if (id === 'valor' || id === 'dataEmissao') {
+                clienteAtualizado.cpf = {
+                    ...clienteAtualizado.cpf,
                     [id]: value
                 }
-            } else if (id === 'nome' || id === 'sobreNome' || id === 'email') {
+            } else if (id === 'nome' || id === 'nomeSocial' || id === 'genero') {
                 clienteAtualizado[id] = value
             }
             setSelectedCliente(clienteAtualizado)
@@ -92,10 +134,12 @@ export const AtualizacaoCliente = ({ clientes, setClientes }: props) => {
     const handleUpdate = async (event: React.FormEvent) => {
         event.preventDefault()
         if (selectedCliente) {
+            console.log(selectedCliente)
             const response = await atualizaCliente(selectedCliente)
             if (response) {
-                const updatedClientes = await fetchClientesData()
-                setClientes(updatedClientes)
+                const updatedClientes = await getAllUsers()
+                if (updatedClientes)
+                    setClientes(updatedClientes)
                 setSelectedCliente(null)
                 setIsFormComplete(false)
             }
@@ -114,7 +158,8 @@ export const AtualizacaoCliente = ({ clientes, setClientes }: props) => {
                                 <tr>
                                     <th>#</th>
                                     <th>Nome</th>
-                                    <th>Sobrenome</th>
+                                    <th>Nome social</th>
+                                    <th>CPF</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -122,8 +167,8 @@ export const AtualizacaoCliente = ({ clientes, setClientes }: props) => {
                                     <tr key={index}>
                                         <td>{cliente.id}</td>
                                         <td className="truncate tooltipped" data-position="top" data-tooltip={cliente.nome} style={{ maxWidth: "150px", display: "table-cell" }}>{cliente.nome}</td>
-                                        <td>{cliente.sobreNome}</td>
-                                        <td>{ }</td>
+                                        <td>{cliente.nomeSocial}</td>
+                                        <td>{formatCPF(cliente.cpf.valor)}</td>
                                         <td><a href="#modal1" className="modal-trigger btn-floating yellow darken-3 btn-small" onClick={() => setSelectedCliente(cliente)}><i className="material-icons">edit</i></a></td>
                                     </tr>
                                 ))}
@@ -138,61 +183,64 @@ export const AtualizacaoCliente = ({ clientes, setClientes }: props) => {
                         <h4>Atualizar Cliente</h4>
                         <div className="row">
                             <div className="input-field col s6">
-                                <input required id="nome" type="text" className="validate" value={selectedCliente?.nome} onChange={handleChange} />
+                                <input required id="nome" type="text" className="validate" value={selectedCliente?.nome || ''} onChange={handleChange} />
                                 <label htmlFor="nome" className="active">Nome</label>
                             </div>
                             <div className="input-field col s6">
-                                <input required id="sobreNome" type="text" className="validate" value={selectedCliente?.sobreNome} onChange={handleChange} />
-                                <label htmlFor="sobreNome" className="active">Sobrenome</label>
+                                <input id="nomeSocial" type="text" className="validate" value={selectedCliente?.nomeSocial || ''} onChange={handleChange} />
+                                <label htmlFor="nomeSocial" className="active">Nome Social</label>
                             </div>
+                        </div>
+                        <div className='row'>
                             <div className="input-field col s12">
-                                <input required id="email" type="email" className="validate" value={selectedCliente?.email} onChange={handleChange} />
-                                <label htmlFor="email">Email</label>
+                                <select id="genero" value={selectedCliente?.genero || ''} onChange={handleChange}>
+                                    <option value="" disabled>Escolha o gênero</option>
+                                    <option value="Masculino">Masculino</option>
+                                    <option value="Feminino">Feminino</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className='row'>
+                            <div className="input-field col s6">
+                                <input required id="valor" type="text" data-length="11" className="validate" value={selectedCliente?.cpf.valor || ''} onChange={handleChange} />
+                                <label htmlFor="valor" className="active">CPF</label>
+                            </div>
+                            <div className="input-field col s6">
+                                <label htmlFor="dataEmissao" className='active'>Data de emissão<span className="red-text"> *</span></label>
+                                <input required type="date" id="dataEmissao" className="validate" value={selectedCliente?.cpf.dataEmissao || ''} onChange={handleChange} />
                             </div>
                         </div>
                         <div className="row">
-                            <h5>Endereço</h5>
-                            <div className='row'>
-                                <div className="input-field col s6">
-                                    <input required id="rua" type="text" className="validate" value={selectedCliente?.endereco.rua} onChange={handleChange} />
-                                    <label htmlFor="rua">Rua</label>
-                                </div>
-                                <div className="input-field col s6">
-                                    <input required title='endereco' id="numero" type="text" className="validate" value={selectedCliente?.endereco.numero} onChange={handleChange} />
-                                    <label htmlFor="numero">Nº</label>
-                                </div>
-                            </div>
-                            <div className='row'>
-                                <div className="input-field col s6">
-                                    <input required id="bairro" type="text" className="validate" value={selectedCliente?.endereco.bairro} onChange={handleChange} />
-                                    <label htmlFor="bairro">Bairro</label>
-                                </div>
-                                <div className="input-field col s6">
-                                    <input required id="cidade" type="text" className="validate" value={selectedCliente?.endereco.cidade} onChange={handleChange} />
-                                    <label htmlFor="cidade">Cidade</label>
-                                </div>
-                            </div>
-                            <div className='row'>
-                                <div className="input-field col s6">
-                                    <input required id="estado" type="text" className="validate" value={selectedCliente?.endereco.estado} onChange={handleChange} />
-                                    <label htmlFor="estado">Estado</label>
-                                </div>
-                                <div className="input-field col s6">
-                                    <input required id="codigoPostal" type="text" className="validate" value={selectedCliente?.endereco.codigoPostal} onChange={handleChange} />
-                                    <label htmlFor="codigoPostal">Código Postal</label>
-                                </div>
-                            </div>
-                            <div className='row'>
-
-                                <div className="input-field col s12">
-                                    <input required id="informacoesAdicionais" type="text" className="validate" value={selectedCliente?.endereco.informacoesAdicionais} onChange={handleChange} />
-                                    <label htmlFor="informacoesAdicionais">Informações adicionais</label>
+                            <div className='col s12'>
+                                <div style={{ maxHeight: 230, overflowY: 'auto' }}>
+                                    <h6>RGs</h6>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Valor</th>
+                                                <th>Data de Emissão</th>
+                                            </tr>
+                                        </thead>
+                                        {
+                                            selectedCliente?.rgs.map((rg, index) => (
+                                                <tbody key={index}>
+                                                    <tr>
+                                                        <td>{index + 1}</td>
+                                                        <td><input id='RgValor' data-length="9" className="validate" type='number' value={rg.valor} onChange={(event) => handleListChange(event, index)}></input></td>
+                                                        <td><input id="RgDataEmissao" type="date" className="validate" value={rg.dataEmissao} onChange={(event) => handleListChange(event, index)} /></td>
+                                                    </tr>
+                                                </tbody>
+                                            ))
+                                        }
+                                    </table>
                                 </div>
                             </div>
                         </div>
                         <div className="row">
                             <div className='col s12'>
                                 <div style={{ maxHeight: 230, overflowY: 'auto' }}>
+                                    <h6>Telefones</h6>
                                     <table>
                                         <thead>
                                             <tr>
@@ -203,11 +251,11 @@ export const AtualizacaoCliente = ({ clientes, setClientes }: props) => {
                                         </thead>
                                         {
                                             selectedCliente?.telefones.map((telefone, index) => (
-                                                <tbody>
+                                                <tbody key={index}>
                                                     <tr>
                                                         <td>{index + 1}</td>
-                                                        <td><input id='ddd' className="validate" data-length="2" type='tel' value={telefone.ddd} onChange={(event) => handleChange(event, index)}></input></td>
-                                                        <td><input title='telefone' id="numero" type="tel" className="validate" value={telefone.numero} onChange={(event) => handleChange(event, index)} /></td>
+                                                        <td><input id="ddd" className="validate" data-length="2" type='tel' value={telefone.ddd} onChange={(event) => handleListChange(event, index)}></input></td>
+                                                        <td><input id="numero" type="tel" className="validate" data-length="12" value={telefone.numero} onChange={(event) => handleListChange(event, index)} /></td>
                                                     </tr>
                                                 </tbody>
                                             ))
